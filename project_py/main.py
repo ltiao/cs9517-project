@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 def corners(im):
 	# Order matters when drawing closed polygon 
+	# We order like so:
 	# 0 --- 1
 	# |     |
 	# |     |
@@ -77,7 +78,7 @@ if __name__ == '__main__':
 	logger.debug('Read {0} training images of dimensions: {1}' \
 		.format(len(train_imgs), map(lambda img: img.shape, train_imgs)))
 
-	detector = cv2.SURF()
+	detector = cv2.SIFT()
 	# Generalized version
 	# detector = cv2.FeatureDetector_create('SIFT')
 
@@ -133,7 +134,9 @@ if __name__ == '__main__':
 	cv2.namedWindow("Tracking", cv2.WINDOW_AUTOSIZE)
 
 	# By default, uses L2-norm with no cross-checking
-	matcher = cv2.BFMatcher()
+	# matcher = cv2.BFMatcher()
+
+	matcher = cv2.FlannBasedMatcher(indexParams=dict(algorithm=FLANN_INDEX_KDTREE, trees=5), searchParams={})
 
 	while True:
 		
@@ -146,6 +149,8 @@ if __name__ == '__main__':
 		# TODO: Loop over all train_keypoints here and decide 
 		# whether and how to display all of them. Only working 
 		# with the first one for right now
+		# TODO: Dynamically add training images, find keypoints/decriptors, etc. 
+		# based on user mouse selection here 
 		train_img, train_keypoints, train_descriptors = train_imgs[0], train_keypoints_lst[0], train_descriptors_lst[0]
 		
 		# list of pairs of best and second best match
@@ -153,17 +158,19 @@ if __name__ == '__main__':
 		# filter matches
 		matches = [a for a, b in top_matches if a.distance < 0.75*b.distance]
 
-		src_pts = np.float32(map(lambda m: train_keypoints[m.trainIdx].pt, matches))
-		dst_pts = np.float32(map(lambda m: query_keypoints[m.queryIdx].pt, matches))
+		# TODO: Get rid of magic number here
+		if len(matches) > 3:
+			src_pts = np.float32(map(lambda m: train_keypoints[m.trainIdx].pt, matches))
+			dst_pts = np.float32(map(lambda m: query_keypoints[m.queryIdx].pt, matches))
 
-		H, mask = cv2.findHomography(src_pts, dst_pts, method=cv2.RANSAC)
-		
-		train_img_corners = np.float32(corners(train_img)).reshape(-1, 1, 2)
+			H, mask = cv2.findHomography(src_pts, dst_pts, method=cv2.RANSAC)
+			
+			train_img_corners = np.float32(corners(train_img)).reshape(-1, 1, 2)
 
-		transformed_train_img_corners = cv2.perspectiveTransform(train_img_corners, H)
+			transformed_train_img_corners = cv2.perspectiveTransform(train_img_corners, H)
 
-		cv2.polylines(query_img, [np.int32(transformed_train_img_corners)], \
-			isClosed=True, color=NEON_GREEN, thickness=2, lineType=cv2.CV_AA)
+			cv2.polylines(query_img, [np.int32(transformed_train_img_corners)], \
+				isClosed=True, color=NEON_GREEN, thickness=2, lineType=cv2.CV_AA)
 
 		# logger.debug('Detected {0} keypoints in frame'.format(len(query_keypoints)))
 		# cv2.imshow("Tracking", cv2.drawKeypoints(query_img, query_keypoints))
