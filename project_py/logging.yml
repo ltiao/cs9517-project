@@ -24,7 +24,7 @@ loggers:
     - default
     level: DEBUG
     propagate: true
-  gui:
+  __main__:
     handlers:
     - default
     - console
