@@ -14,7 +14,7 @@ handlers:
   default:
     backupCount: 10
     class: logging.handlers.RotatingFileHandler
-    filename: superres.log
+    filename: project.log
     formatter: simple
     level: DEBUG
     maxBytes: 5242880
