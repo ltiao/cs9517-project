@@ -16,16 +16,39 @@ using namespace cv;
 #define SURF_D 0
 #define SIFT_D 1
 #define ORB_D 2
-#define FAST_D 4
+#define FAST_D 3
+#define STAR_D 4
 
 #define ORB_E 5
 #define SURF_E 6
 #define SIFT_E 7
 #define BRIEF_E 8
-#define FREAK_E 9
 
-#define BFHAM_M 10
-#define FLANN_M 11
+#define BFHAM_M 9
+#define FLANN_M 10
+
+string ctos(char a[]) {
+    ostringstream ss;
+    ss << a;
+    return ss.str();
+}
+
+int getCode(char a[]) {
+    string s = ctos(a);
+    int r = 0;
+    if (s == "SURF_D") r = SURF_D;
+    if (s == "SIFT_D") r = SIFT_D;
+    if (s == "ORB_D")  r = ORB_D;
+    if (s == "FAST_D") r = FAST_D;
+    if (s == "STAR_D") r = STAR_D;
+
+    if (s == "ORB_E")  r = ORB_E;
+    if (s == "SURF_E") r = SURF_E;
+    if (s == "SIFT_E") r = SIFT_E;
+    if (s == "BRIEF_E") r = BRIEF_E;
+    
+    return r;
+}
 
 int detector_code, extractor_code, matcher_code;
 int offset;
@@ -61,6 +84,9 @@ void useDetector(Mat img, vector<KeyPoint> &keypoints) {
         detector.detect(img, keypoints);
     } else if (detector_code == FAST_D) {
         FastFeatureDetector detector;
+        detector.detect(img, keypoints);
+    } else if (detector_code == STAR_D) {
+        SiftFeatureDetector detector;
         detector.detect(img, keypoints);
     }
 }
@@ -144,8 +170,13 @@ Mat drawHomography(vector<KeyPoint> keypoints_obj,
     return img_matches;
 }
 
-Mat process_images(vector<Mat> img_objects, vector<vector<KeyPoint> > keypoints_objects, 
-                   vector<Mat> descriptors_objects, Mat img_scene, 
+// globals since a mouse action can update these
+vector<Mat> img_objects;
+vector<vector<KeyPoint> > keypoints_objects;
+vector<Mat> descriptors_objects;
+vector<KeyPoint> keypoints_object;
+
+Mat process_images(Mat img_scene, 
                    vector<vector<DMatch> > &good_matches) {
 
     vector<KeyPoint> keypoints_scene;
@@ -190,36 +221,19 @@ void printUsage() {
          << "[-e extractor_code]" << endl;
 }
 
-string ctos(char a[]) {
-    ostringstream ss;
-    ss << a;
-    return ss.str();
-}
-
-int getCode(char a[]) {
-    string s = ctos(a);
-    int r = 0;
-    if (s == "SURF_D") r = SURF_D;
-    if (s == "SIFT_D") r = SIFT_D;
-    if (s == "ORB_D")  r = ORB_D;
-    if (s == "FAST_D") r = FAST_D;
-    if (s == "ORB_E")  r = ORB_E;
-    if (s == "SURF_E") r = SURF_E;
-    if (s == "SIFT_E") r = SIFT_E;
-    return r;
-}
 
 
 
-// globals since a mouse action can update these
-vector<Mat> img_objects;
-vector<vector<KeyPoint> > keypoints_objects;
-vector<Mat> descriptors_objects;
-vector<KeyPoint> keypoints_object;
-Mat descriptors_object;
+
 
 void makeSomeStuff() {
 
+    // img_objects.clear();
+    // keypoints_objects.clear();
+    // descriptors_objects.clear();
+    // keypoints_objects.clear();
+    
+    Mat descriptors_object;
     for (int i = 0; i < img_objects.size(); i++) {
         useDetector(img_objects[i], keypoints_object);
         useExtractor(img_objects[i], keypoints_object, descriptors_object);
@@ -231,6 +245,7 @@ void makeSomeStuff() {
 
 Mat img, orig_img;
 bool drawing = false;
+bool needToMakeStuff = false;
 int sx, sy, ex, ey;
 
 void CallBackFunc(int event, int x, int y, int flags, void* userdata) {
@@ -248,7 +263,8 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata) {
 
             img_objects.clear();
             img_objects.push_back(disp);
-            makeSomeStuff();
+            // makeSomeStuff();
+            needToMakeStuff = true;
 
             // add to makesomestuff here
         }
@@ -298,6 +314,10 @@ int main( int argc, char** argv ) {
     else matcher_code = FLANN_M;
 
     // read in the images
+    if (images.size() == 0) {
+        printUsage();
+        return 0;
+    }
     for (int i = 0; i < images.size(); i++) img_objects.push_back(imread(images[i]));
 
     VideoCapture cap;
@@ -322,37 +342,49 @@ int main( int argc, char** argv ) {
     Mat img_scene;
     // vector<Mat> processed;
     int f = 0;
+
     for(;;) {
         f++;
-        if (f % 10 == 0) {
-            double g = double(clock() - startTime)/ (double) CLOCKS_PER_SEC;
-            cout << "frame: " << f << " | seconds: " 
-                      << g << " | fps: " << f*1.0/g << endl;
-        }
+
+        // if (f % 10 == 0) {
+        //     double g = double(clock() - startTime)/ (double) CLOCKS_PER_SEC;
+        //     cout << "frame: " << f << " | seconds: " 
+        //               << g << " | fps: " << f*1.0/g << endl;
+        // }
         vector<vector<DMatch> > good_matches(img_objects.size());
 
         if (!drawing) {
             cap >> img_scene;
+            // shrink if webcam
+            if (input.length() == 0) resize(img_scene, img_scene, Size(0,0), 0.5, 0.5);   
+    
             if (img_scene.empty()) break;
             orig_img = img_scene;
-            Mat m = process_images(img_objects, keypoints_objects, descriptors_objects, 
-                                   img_scene, good_matches);
+            Mat m = process_images(img_scene, good_matches);
             // offset is found here
             img = m;
         }
-        
+    
         drawImage();
-        
+
+        if (needToMakeStuff == true) {
+            // makeSomeStuff();
+            needToMakeStuff = false;
+        }
 
         // processed.push_back(m);
 
         // print out some stats
-        // for (int i = 0; i < keypoints_objects.size(); i++) {
-        //     cout << good_matches[i].size()*1.0 / keypoints_objects[i].size()*1.0 << " ";
-        // }
-        // cout << endl;
+        for (int i = 0; i < keypoints_objects.size(); i++) {
+            printf("Frame: %4d Score: %lf\n", f, good_matches[i].size()*1.0 / keypoints_objects[i].size()*1.0 );
+        }
 
         if(waitKey(1) >= 0) break;  
     }
+
+    double g = double(clock() - startTime)/ (double) CLOCKS_PER_SEC;
+    cout << "frame: " << f << " | seconds: " 
+         << g << " | fps: " << f*1.0/g << endl;
+
     return 0;
 }
