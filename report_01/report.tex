@@ -98,6 +98,9 @@
 \usepackage{cleveref}
 \usepackage{microtype}
 
+\usepackage{titling}
+\setlength{\droptitle}{-5em}
+
 %----------------------------------------------------------------------------------------
 %	TITLE SECTION
 %----------------------------------------------------------------------------------------
@@ -143,7 +146,7 @@ results in \cref{sec:results}.
 
 \section{Approach} \label{sec:approach}
 
-We use the conventional feature-based methods to approach this task. Namely, we find
+We use the conventional feature-based methods to address this task. Namely, we find
 the correspondences between distinctive features in the video frames and the reference 
 images, such as corners, edges, blobs, etc. and thereby fit a homographic transformation 
 to the corresponding points in the video frame and reference image. This process is
@@ -151,10 +154,22 @@ broken down into the following subtasks, and we describe our approach for each o
 
 \subsection{Detection and Description}
 
+% If space allows:
+% * discuss parameters
+% * reference OpenCV functions
+% * add image matching example
+% * other combinations
+% * different detectors for reference images and video frames
+% TODO:
+% * references
+% * point to discussion
+
 To detect distinctive features in images and compute their description vectors 
 (descriptors), we first experimented with the class of algorithms based on scale-space 
-extrema detection: \emph{Scale-Invariant Feature Transform} (SIFT) and \emph{Speeded-Up 
-Robust Features} (SURF), the latter being an improvement and optimization of the former. 
+extrema detection: \emph{Scale-Invariant Feature Transform} \citep{Lowe2004} (SIFT) and 
+\emph{Speeded-Up Robust Features} \citep{Bay2008} (SURF), the latter being an improvement 
+and optimization 
+of the former. 
 
 These algorithms encompass the tasks of detecting features and computing descriptors
 in a way that is both scale and rotation invariant. In practice, we found SIFT offered
@@ -163,31 +178,68 @@ application. Although SURF offered better performance in terms of speed, it did 
 the cost of some accuracy and was ultimately still too slow for real-time application.
 
 Next, we experimented with (a combination of) other feature detectors and descriptor 
-extractors, namely: \emph{Features from Accelerated Segment Test} (FAST), which is
-solely a feature detector, \emph{Binary Robust Independent Elementary Features} (BRIEF),
-which is solely a descriptor extractor, and finally, \emph{Oriented FAST and Rotated BRIEF}
-(ORB), which (as the name suggests) is an amalgamation of FAST and BRIEF with 
-modifications to support rotation invariance.
+extractors, namely: \emph{Features from Accelerated Segment Test} \citep{Rosten2006} (FAST), 
+which is solely a feature detector, \emph{Binary Robust Independent Elementary Features} 
+\citep{Calonder2010} (BRIEF), which is solely a descriptor extractor, and finally, 
+\emph{Oriented FAST and Rotated BRIEF} \citep{Rublee2011} (ORB), which (as the name suggests) 
+is an amalgamation of FAST and BRIEF with modifications to support rotation invariance.
 
+As expected, the combination of FAST and BRIEF performed much faster than SIFT/SURF,
+and was of comparable accuracy to SIFT/SURF when there was little to no rotation, but
+of practically no accuracy in the presence of rotation. 
 
-In \cref{sec:results}
+To our dismay, we found that ORB+ORB (the combination of ORB as both a feature detector 
+and descriptor extractor), while still very fast, was not more accurate than FAST+BRIEF 
+in the presence of rotation, let alone without it.
+
+In the end, we concluded that SURF+SURF was most suitable for real-time applications with
+rotation, and otherwise FAST+BRIEF for those without it. For offline applications,
+SIFT+SIFT remains the most suitable. We designed our software to allow for different  
+combinations of feature detector and descriptor extractor to be specified at runtime,
+to account for the different possible kinds of applications.
 
 \subsection{Matching}
 
-\begin{itemize}
-	\item Brute Force (\texttt{NORM\_HAMMING})
-	\item Approximate Nearest Neighbors (kd-Tree, Locality Sensitive Hashing) 
-\end{itemize}
+Once we detect the features (keypoint) and compute their descriptor vectors in both the 
+video frame and the reference image(s), we match them by identifying the nearest neighbor 
+of the keypoint in a video frame in the set of keypoints of the reference images. The
+distance metric, and by extension, the definition of nearest neighbor is dependent upon the 
+descriptor extractor, since the descriptor computed under SIFT/SURF is a 128-element 
+real-valued vector, while it is a binary string under ORB/BRIEF.
 
-Outlier rejection
+For descriptor extractors that use real-valued vectors, we experimented with the exhaustive 
+search matcher, implemented with \texttt{BFMatcher} in OpenCV, with the $L_2$-norm (Euclidean 
+distance) as the distance metric. We also tried an approximate nearest neighbor matcher, 
+specifically using $k$-d trees and implemented with \texttt{FlannBasedMatcher} in OpenCV 
+and its interface to FLANN (Fast Library for Approximate Nearest Neighbors). Consistent with 
+\citeauthor{Lowe2004}'s observation in \citep{Lowe2004}, this did not provide a significant 
+speed-up over exhaustive search. 
+
+For descriptor extractors that use binary strings, we likewise use an exhaustive search, but
+with Hamming distance as the distance metric and later also tried an approximate nearest neighbor 
+matcher (using Locality-sensitive hashing (LSH) instead of $k$-d trees). Again, this did not 
+provide a significant speed-up over exhaustive search. 
+
+We perform the simple outlier rejection procedure suggested by \citeauthor{Lowe2004} after 
+the above matches have been found by comparing the distance of the closest neighbor 
+to that of the second-closest neighbor and discarding the match if the closest neighbor
+not much closer than the closest incorrect match. The rationale is that correct matches need 
+to have the the closest neighbor significantly closer than the closest incorrect match to 
+achieve reliable matching.
 
 \subsection{Transformation}
+
+Once set of correspondences have been obtained, we use the iterative Random sample consensus 
+(RANSAC) method to fit a homographic transformation to the pairs of points in the correspondences,
+which is almost guaranteed to contains outliers. This is implemented with the \texttt{findHomography} 
+function in OpenCV with \texttt{CV\_RANSAC} specified as the method.
 
 \texttt{findHomography} (RANSAC)
 \texttt{perspectiveTransform}
 
 \section{Results} \label{sec:results}
 
+\bibliography{bibliography}
 
 
 %----------------------------------------------------------------------------------------
