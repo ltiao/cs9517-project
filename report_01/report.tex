@@ -108,12 +108,18 @@
 \normalfont \normalsize 
 % \textsc{university, school or department name} \\ [25pt] % Your university, school and/or department name(s)
 \horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
-\huge \LaTeX~Boilerplate \\ [0.1cm] % The assignment title
-\large Optimized for the practicing computer scientist \\ [0.2cm]
+\Large Computer Vision Project (Part 1) \\ [0.1cm] % The assignment title
+\large COMP9517 - Semester 1, 2015 \\ [0.2cm]
 \horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
 }
 
-\author{Louis Tiao} % Your name
+\author{
+	Louis Tiao \\
+	(\texttt{3390558})
+	\and
+	Edward Lee\\
+	(\texttt{3xxxxxx})
+} % Your name
 
 \date{\normalsize\today} % Today's date or a custom date
 
@@ -125,83 +131,39 @@
 %	PROBLEM 1
 %----------------------------------------------------------------------------------------
 
-\section{Problem title}
+\section{Approach}
 
-\lipsum[2] % Dummy text
+We give a high-level overview of our approach below
 
-\begin{align} 
-\begin{split}
-(x+y)^3 	&= (x+y)^2(x+y)\\
-&=(x^2+2xy+y^2)(x+y)\\
-&=(x^3+2x^2y+xy^2) + (x^2y+2xy^2+y^3)\\
-&=x^3+3x^2y+3xy^2+y^3
-\end{split}					
-\end{align}
+\subsection{Detection and Description}
 
-Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies
+In \cref{sec:results}
 
-\begin{theorem}
-P = NP.
-\end{theorem}
-
-\begin{proof}
-Left as an exercise to the reader.
-\end{proof}
-
-%------------------------------------------------
-
-\subsection{Heading on level 2 (subsection)}
-
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. 
-\begin{align}
-A = 
-\begin{bmatrix}
-A_{11} & A_{21} \\
-A_{21} & A_{22}
-\end{bmatrix}
-\end{align}
-Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
-
-%------------------------------------------------
-
-\subsubsection{Heading on level 3 (subsubsection)}
-
-\lipsum[3] % Dummy text
-
-\paragraph{Heading on level 4 (paragraph)}
-
-\lipsum[6] % Dummy text
-
-%----------------------------------------------------------------------------------------
-%	PROBLEM 2
-%----------------------------------------------------------------------------------------
-
-\section{Lists}
-
-%------------------------------------------------
-
-\subsection{Example of list (3*itemize)}
 \begin{itemize}
-	\item First item in a list 
-		\begin{itemize}
-		\item First item in a list 
-			\begin{itemize}
-			\item First item in a list 
-			\item Second item in a list 
-			\end{itemize}
-		\item Second item in a list 
-		\end{itemize}
-	\item Second item in a list 
+	\item SIFT (Scale-Invariant Feature Transform)
+	\item SURF (Speeded-Up Robust Features)
+	\item FAST (Features from Accelerated Segment Test)
+	\item BRIEF (Binary Robust Independent Elementary Features)
+	\item ORB (Oriented FAST and Rotated BRIEF)
 \end{itemize}
 
-%------------------------------------------------
+\subsection{Matching}
 
-\subsection{Example of list (enumerate)}
-\begin{enumerate}
-\item First item in a list 
-\item Second item in a list 
-\item Third item in a list
-\end{enumerate}
+\begin{itemize}
+	\item Brute Force (\texttt{NORM\_HAMMING})
+	\item Approximate Nearest Neighbors (kd-Tree, Locality Sensitive Hashing) 
+\end{itemize}
+
+Outlier rejection
+
+\subsection{Transformation}
+
+\texttt{findHomography} (RANSAC)
+\texttt{perspectiveTransform}
+
+\section{Results} \label{sec:results}
+
+
 
 %----------------------------------------------------------------------------------------
 
