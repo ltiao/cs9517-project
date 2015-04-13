@@ -131,3 +131,4 @@ target/
 *.vrb
 *.xdy
 *.tdo
+.DS_Store
