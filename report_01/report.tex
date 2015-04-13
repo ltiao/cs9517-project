@@ -131,21 +131,46 @@
 %	PROBLEM 1
 %----------------------------------------------------------------------------------------
 
-\section{Approach}
+\section{Introduction}
 
-We give a high-level overview of our approach below
+In Part 1 of the project, we are tasked with implementing software to track a number 
+of (planar) objects in sequential video frames. In other words, given a number of 
+reference images containing planar objects, we are required to estimate the motion 
+models that describe how the objects are changing in the video sequence over time, 
+in terms of translation, rotation, scale and other homographic transformations. We 
+present a high-level overview of our approach in \cref{sec:approach} and discuss the 
+results in \cref{sec:results}.
+
+\section{Approach} \label{sec:approach}
+
+We use the conventional feature-based methods to approach this task. Namely, we find
+the correspondences between distinctive features in the video frames and the reference 
+images, such as corners, edges, blobs, etc. and thereby fit a homographic transformation 
+to the corresponding points in the video frame and reference image. This process is
+broken down into the following subtasks, and we describe our approach for each one.
 
 \subsection{Detection and Description}
 
-In \cref{sec:results}
+To detect distinctive features in images and compute their description vectors 
+(descriptors), we first experimented with the class of algorithms based on scale-space 
+extrema detection: \emph{Scale-Invariant Feature Transform} (SIFT) and \emph{Speeded-Up 
+Robust Features} (SURF), the latter being an improvement and optimization of the former. 
 
-\begin{itemize}
-	\item SIFT (Scale-Invariant Feature Transform)
-	\item SURF (Speeded-Up Robust Features)
-	\item FAST (Features from Accelerated Segment Test)
-	\item BRIEF (Binary Robust Independent Elementary Features)
-	\item ORB (Oriented FAST and Rotated BRIEF)
-\end{itemize}
+These algorithms encompass the tasks of detecting features and computing descriptors
+in a way that is both scale and rotation invariant. In practice, we found SIFT offered
+very good performance in terms of accuracy, but was impractically slow for real-time 
+application. Although SURF offered better performance in terms of speed, it did so at
+the cost of some accuracy and was ultimately still too slow for real-time application.
+
+Next, we experimented with (a combination of) other feature detectors and descriptor 
+extractors, namely: \emph{Features from Accelerated Segment Test} (FAST), which is
+solely a feature detector, \emph{Binary Robust Independent Elementary Features} (BRIEF),
+which is solely a descriptor extractor, and finally, \emph{Oriented FAST and Rotated BRIEF}
+(ORB), which (as the name suggests) is an amalgamation of FAST and BRIEF with 
+modifications to support rotation invariance.
+
+
+In \cref{sec:results}
 
 \subsection{Matching}
 
