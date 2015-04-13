@@ -231,11 +231,12 @@ achieve reliable matching.
 
 Once set of correspondences have been obtained, we use the iterative Random sample consensus 
 (RANSAC) method to fit a homographic transformation to the pairs of points in the correspondences,
-which is almost guaranteed to contains outliers. This is implemented with the \texttt{findHomography} 
-function in OpenCV with \texttt{CV\_RANSAC} specified as the method.
-
-\texttt{findHomography} (RANSAC)
-\texttt{perspectiveTransform}
+which is almost guaranteed to contains outliers. This is implemented using the \texttt{findHomography} 
+function in OpenCV with \texttt{CV\_RANSAC} specified as the method. With the transformation 
+matrix $H$, we visualize the located object in the video frame by applying $H$ to the four corner 
+points of the reference image using \texttt{perspectiveTransform} and drawing a closed polygon 
+around those points on the video frame. This serves to highlight the object and its transformation 
+with respect to the reference image.
 
 \section{Results} \label{sec:results}
 
