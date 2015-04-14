@@ -50,31 +50,11 @@ int getCode(char a[]) {
     return r;
 }
 
-int detector_code, extractor_code, matcher_code;
-int offset;
-
-// cli: -d <detector-code> -e <extractor-code>
-// defaults to SURF SURF flann
-// matcher BF(ham) for orb, flann otherwise
-/* flags:
-    1. Preprocess the entire thing. Might be a good idea to detect the number
-       of frames ahead of time. Can detect up to 3 images
-    2. realtime, which gives us access to the special gui. Can select regions and hold them
-    3. frame skip flag. If set, to i, will only read in ever ith frame.
-
-    a) When we are dealing with multiple images, only draw the lines for 
-        the most prominent image. All 3 images will be displayed in another frame which
-        holds the cropped images.
-    */
-
-// Mat img_object;
-// vector<KeyPoint> keypoints_object;
-// Mat descriptors_object;
+int detector_code, extractor_code, matcher_code, n, offset;
 
 void useDetector(Mat img, vector<KeyPoint> &keypoints) {
     if (detector_code == SURF_D) {
         SurfFeatureDetector detector;
-        // FeatureDetector detector;
         detector.detect(img, keypoints);
     } else if (detector_code == SIFT_D) {
         SiftFeatureDetector detector;
@@ -138,17 +118,11 @@ Mat drawHomography(vector<KeyPoint> keypoints_obj,
         obj.push_back( keypoints_obj[ good_matches[i].queryIdx ].pt );
         scene.push_back( keypoints_scene[ good_matches[i].trainIdx ].pt );
     }
-
-    // cout << "image is about to show\n";
-
     if (good_matches.size() < 4) return img_matches;
-
+    
     // Mat mask;
     Mat H = findHomography( obj, scene, CV_RANSAC, 1, mask);
-
     score = (sum(mask))[0]*1.0 / good_matches.size()*1.0;
-
-    // cout << " score: " << score;
 
     //-- Get the corners from the image_1 ( the object to be "detected" )
     vector<Point2f> obj_corners(4);
@@ -161,22 +135,16 @@ Mat drawHomography(vector<KeyPoint> keypoints_obj,
     perspectiveTransform( obj_corners, scene_corners, H);
 
     //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-
-    line( img_matches, scene_corners[0], scene_corners[1], Scalar( 0, 255, 0), 4 );
-    line( img_matches, scene_corners[1], scene_corners[2], Scalar( 0, 255, 0), 4 );
-    line( img_matches, scene_corners[2], scene_corners[3], Scalar( 0, 255, 0), 4 );
-    line( img_matches, scene_corners[3], scene_corners[0], Scalar( 0, 255, 0), 4 );
+    line( img_matches, scene_corners[0], scene_corners[1], Scalar( 0, 255, 0), 2 );
+    line( img_matches, scene_corners[1], scene_corners[2], Scalar( 0, 255, 0), 2 );
+    line( img_matches, scene_corners[2], scene_corners[3], Scalar( 0, 255, 0), 2 );
+    line( img_matches, scene_corners[3], scene_corners[0], Scalar( 0, 255, 0), 2 );
     
     return img_matches;
 }
 
-// globals since a mouse action can update these
-vector<Mat> img_objects;
-vector<vector<KeyPoint> > keypoints_objects;
-vector<Mat> descriptors_objects;
-vector<KeyPoint> keypoints_object;
-
-Mat process_images(Mat img_scene, 
+Mat process_images(vector<Mat> img_objects, vector<vector<KeyPoint> > keypoints_objects,
+                   vector<Mat> descriptors_objects, Mat img_scene, 
                    vector<vector<DMatch> > &good_matches) {
 
     vector<KeyPoint> keypoints_scene;
@@ -186,66 +154,43 @@ Mat process_images(Mat img_scene,
     useDetector(img_scene, keypoints_scene);
     useExtractor(img_scene, keypoints_scene, descriptors_scene);
 
-    for (int i = 0; i < img_objects.size(); i++) {
+    for (int i = 0; i < n; i++) {
         useMatcher(descriptors_objects[i], descriptors_scene, matches[i]);
         good_matches[i] = goodMatches(matches[i], descriptors_objects[i].rows);
     }
 
     Mat img_matches = img_scene.clone();
-    vector<double> scores(img_objects.size());
-    vector<Mat> masks(img_objects.size());
+    vector<double> scores(n);
+    vector<Mat> masks(n);
 
-    for (int i = 0; i < img_objects.size(); i++) {
+    for (int i = 0; i < n; i++) {
         img_matches = drawHomography(keypoints_objects[i], keypoints_scene, 
                                      good_matches[i], img_matches, img_objects[i], 
                                      scores[i], masks[i]);
-        // cout << "| for: " << i << " score: " << scores[i];
     }
-    // cout << endl;
 
-    int b = *(max_element(scores.begin(), scores.end()));
+    int b = 0;
+    if (n > 1) {
+        double max = scores[0];
+        for (int j = 1; j < n; j++) {
+            if (scores[j] > max) {
+                max = scores[j];
+                b = j;
+            }
+        }
+    }
+    
     Mat img_drawn;
-
     drawMatches( img_objects[b], keypoints_objects[b], img_matches, keypoints_scene,
                  good_matches[b], img_drawn, Scalar::all(-1), Scalar::all(-1),
                  masks[b], DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-
     offset = img_objects[b].cols;
-    // cout << "offset: " << offset << endl;;
 
     return img_drawn;
 }
 
-void printUsage() {
-    cout << "Usage [-p] [-v input_video] [-i input_image] [-d detector_code] " 
-         << "[-e extractor_code]" << endl;
-}
-
-
-
-
-
-
-void makeSomeStuff() {
-
-    // img_objects.clear();
-    // keypoints_objects.clear();
-    // descriptors_objects.clear();
-    // keypoints_objects.clear();
-    
-    Mat descriptors_object;
-    for (int i = 0; i < img_objects.size(); i++) {
-        useDetector(img_objects[i], keypoints_object);
-        useExtractor(img_objects[i], keypoints_object, descriptors_object);
-        keypoints_objects.push_back(keypoints_object);
-        descriptors_objects.push_back(descriptors_object);
-        cout << "num: " << i << " num keypoints:" << keypoints_object.size() << endl;;
-    }
-}
-
-Mat img, orig_img;
-bool drawing = false;
-bool needToMakeStuff = false;
+Mat img, orig_img, cropped;
+bool drawing = false, isCropped = false;
 int sx, sy, ex, ey;
 
 void CallBackFunc(int event, int x, int y, int flags, void* userdata) {
@@ -258,15 +203,8 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata) {
         if (sx != x && sy != y) {
             if (sx > x) swap(sx, x);
             if (sy > y) swap(sy, y);
-            Mat disp = orig_img(Rect(sx-offset, sy, x-sx, y-sy)).clone();
-            // imshow("Crop", disp);
-
-            img_objects.clear();
-            img_objects.push_back(disp);
-            // makeSomeStuff();
-            needToMakeStuff = true;
-
-            // add to makesomestuff here
+            cropped = orig_img(Rect(sx-offset, sy, x-sx, y-sy)).clone();
+            isCropped = true;
         }
     } else if (event == EVENT_MOUSEMOVE ) {
         if (drawing) { ex = x; ey = y; } 
@@ -283,7 +221,56 @@ void drawImage() {
     }
 }
 
+vector<Mat> img_objects;
+vector<vector<KeyPoint> > keypoints_objects;
+vector<Mat> descriptors_objects;
+vector<KeyPoint> keypoints_object;
 
+void makeSomeStuff() {
+
+    keypoints_objects.clear();
+    descriptors_objects.clear();
+    
+    Mat descriptors_object;
+    for (int i = 0; i < img_objects.size(); i++) {
+        useDetector(img_objects[i], keypoints_object);
+        useExtractor(img_objects[i], keypoints_object, descriptors_object);
+        keypoints_objects.push_back(keypoints_object);
+        descriptors_objects.push_back(descriptors_object);
+        cout << "Image: " << (i+1) << " #keypoints: " << keypoints_object.size() << endl;;
+    }
+}
+
+void showInputImages() {
+    namedWindow("Input 1", 1);
+    imshow("Input 1", img_objects[0]);
+    if (n >= 2) {
+        namedWindow("Input 2", 1);
+        imshow("Input 2", img_objects[1]);
+    }
+    if (n >= 3) {
+        namedWindow("Input 3", 1);
+        imshow("Input 3", img_objects[2]);
+    }
+}
+
+int rot = 0;
+void processCrops() {
+    if (isCropped) {
+        rot = (rot + 1) % 3;
+        if (n == 3) img_objects[rot] = cropped;
+        else img_objects.push_back(cropped);
+        n = min(n+1, 3);
+        makeSomeStuff();
+        isCropped = false;
+        showInputImages();
+    }
+}
+
+void printUsage() {
+    cout << "Usage [-p] [-v input_video] [-i input_image] [-d detector_code] " 
+         << "[-e extractor_code]" << endl;
+}
 
 int main( int argc, char** argv ) {
 
@@ -296,7 +283,6 @@ int main( int argc, char** argv ) {
     detector_code = SURF_D;
     extractor_code = SURF_E;
 
-
     for (int i = 1; i < argc; i++) {
         if (ctos(argv[i]) == "-p") preprocess = true;
         if (ctos(argv[i]) == "-v") input = ctos(argv[i+1]);
@@ -308,79 +294,92 @@ int main( int argc, char** argv ) {
             if (getCode(argv[i+1]) > 0)
                 extractor_code = getCode(argv[i+1]);
     }
+    n = images.size();
 
     // get the right matcher
     if (extractor_code == ORB_E || extractor_code == BRIEF_E) matcher_code = BFHAM_M;
     else matcher_code = FLANN_M;
 
     // read in the images
-    if (images.size() == 0) {
+    if (n == 0) {
         printUsage();
         return 0;
     }
+
     for (int i = 0; i < images.size(); i++) img_objects.push_back(imread(images[i]));
+    makeSomeStuff();
+    showInputImages();
 
     VideoCapture cap;
     if (input.length() == 0) {
-        VideoCapture t(0);
-        cap = t;
+        cap.open(0);
     } else {
-        VideoCapture t(input);
-        cap = t; 
+        cap.open(input);
     }
 
-    if(!cap.isOpened())  // check if we succeeded
-        return -1;
+    if(!cap.isOpened()) return -1;
 
-    makeSomeStuff();
-
-    namedWindow("Movie", 1);
-    setMouseCallback("Movie", CallBackFunc, NULL);
+    if (!preprocess) {
+        namedWindow("Movie", 1);
+        setMouseCallback("Movie", CallBackFunc, NULL);
+    }
 
     clock_t startTime = clock();
-
     Mat img_scene;
-    // vector<Mat> processed;
+    vector<Mat> savedMats;
     int f = 0;
-
     for(;;) {
         f++;
+        processCrops();
 
-        // if (f % 10 == 0) {
-        //     double g = double(clock() - startTime)/ (double) CLOCKS_PER_SEC;
-        //     cout << "frame: " << f << " | seconds: " 
-        //               << g << " | fps: " << f*1.0/g << endl;
-        // }
+        if (f % 10 == 0) {
+            double g = double(clock() - startTime)/ (double) CLOCKS_PER_SEC;
+            printf("frame: %4d | seconds: %lf | fpd %lf\n", f, g, f*1.0/g);
+        }
         vector<vector<DMatch> > good_matches(img_objects.size());
 
         if (!drawing) {
             cap >> img_scene;
+            if (img_scene.empty()) {
+                cout << "finished reading\n";
+                break;
+            }
             // shrink if webcam
             if (input.length() == 0) resize(img_scene, img_scene, Size(0,0), 0.5, 0.5);   
     
-            if (img_scene.empty()) break;
+            
             orig_img = img_scene;
-            Mat m = process_images(img_scene, good_matches);
+            Mat m = process_images(img_objects, keypoints_objects, descriptors_objects,
+                                   img_scene, good_matches);
             // offset is found here
+            savedMats.push_back(m);
             img = m;
         }
-    
-        drawImage();
-
-        if (needToMakeStuff == true) {
-            // makeSomeStuff();
-            needToMakeStuff = false;
-        }
-
-        // processed.push_back(m);
+        
+        if (!preprocess) drawImage();
 
         // print out some stats
-        for (int i = 0; i < keypoints_objects.size(); i++) {
-            printf("Frame: %4d Score: %lf\n", f, good_matches[i].size()*1.0 / keypoints_objects[i].size()*1.0 );
-        }
-
+        // for (int i = 0; i < s; i++) {
+        //     printf("Frame: %4d Score: %lf\n", f, good_matches[i].size()*1.0 / keypoints_objects[i].size()*1.0 );
+        // }
         if(waitKey(1) >= 0) break;  
     }
+
+    if (preprocess) {
+        cout << "Preprocessing done. Press any key to continue\n";
+        waitKey(0);
+        namedWindow("Processed Movie", 1);
+        for (int i = 0; i < savedMats.size(); i++) {
+            imshow("Processed Movie", savedMats[i]);
+            if (waitKey(30) >= 0) break;
+        }
+    }
+
+    // // video write out (currently not working)    
+    // VideoWriter vwriter ("out.m4v", cap.get(CV_CAP_PROP_FOURCC), cap.get(CV_CAP_PROP_FPS), savedMats[0].size(), true);
+    // for (int i = 0; i < savedMats.size(); i++) 
+    //     vwriter.write(savedMats[i]);
+
 
     double g = double(clock() - startTime)/ (double) CLOCKS_PER_SEC;
     cout << "frame: " << f << " | seconds: " 
