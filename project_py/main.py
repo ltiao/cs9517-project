@@ -7,6 +7,7 @@ import cv2
 import os
 
 from operator import attrgetter, itemgetter
+from collections import namedtuple
 
 # The FLANN Index enums aren't exposed in the OpenCV Python bindings. We create
 # our own in accordance with:
@@ -19,11 +20,29 @@ NEON_GREEN = 60, 255, 20
 
 BASE_DIR = os.path.dirname(__file__)
 
+drawing = False
+
 # Initialize logger from configuration file
 with open(os.path.join(BASE_DIR, 'logging.yml')) as infile:
 	logging.config.dictConfig(yaml.load(infile))
 
 logger = logging.getLogger(__name__)
+
+class Subject(namedtuple('Subject', ['image', 'keypoints', 'descriptors'])):
+	pass
+
+class Tracker:
+
+	def __init__(self, detector=None, extractor=None, matcher=None):
+		if detector is None:
+			self.detector = cv2.SIFT()
+		if extractor is None:
+			self.extractor = self.detector
+		if matcher is None:
+			self.matcher = cv2.BFMatcher()
+
+
+
 
 def corners(im):
 	# Order matters when drawing closed polygon 
@@ -34,6 +53,37 @@ def corners(im):
 	# 3 --- 2
 	h, w = im.shape[:2]
 	return [(0, 0), (w-1, 0), (w-1, h-1), (0, h-1)]
+
+# mouse callback function
+def mouseCallback(event, x, y, flags, param):
+	logger.debug(param)
+	global sx, sy, ex, ey, drawing, query_img, train_imgs, train_keypoints_lst, train_descriptors_lst
+	if event == cv2.EVENT_LBUTTONDOWN:
+		sx, sy, ex, ey, drawing = x, y, x, y, True
+	if event == cv2.EVENT_LBUTTONUP:
+		drawing = False
+		cv2.namedWindow('Crop')
+		if (sx != x and sy != y):
+			if (sx > x): sx, x = x, sx
+			if (sy > y): sy, y = y, sy
+			cv2.imshow('Crop', query_img[sy:y, sx:x])
+			# new_train_img = np.array(query_img[sy:y, sx:x])
+			# train_imgs.append(new_train_img)
+			# train_keypoints, train_descriptors = detector.detectAndCompute(new_train_img, mask=None)
+			# train_keypoints_lst.append(train_keypoints)
+			# train_descriptors_lst.append(train_descriptors)
+	if event == cv2.EVENT_MOUSEMOVE:
+		if drawing:
+			ex, ey = x,y
+
+def drawImage(img):
+	global sx, sy, ex, ey, drawing
+	if drawing:
+		img2 = np.copy(img)
+		cv2.rectangle(img2, (sx,sy), (ex,ey), (255,0,0), 2)
+		cv2.imshow('Tracking', img2)
+	else:   
+		cv2.imshow('Tracking', img)
 
 if __name__ == '__main__':
 
@@ -131,12 +181,16 @@ if __name__ == '__main__':
 		# out = cv2.VideoWriter(filename=args.output_video_file)
 		pass
 
-	cv2.namedWindow("Tracking", cv2.WINDOW_AUTOSIZE)
+	cv2.namedWindow('Tracking', cv2.WINDOW_AUTOSIZE)
+	cv2.setMouseCallback('Tracking', mouseCallback, param={'a': 3, 'b': 7})
 
 	# By default, uses L2-norm with no cross-checking
-	# matcher = cv2.BFMatcher()
+	# matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 
 	matcher = cv2.FlannBasedMatcher(indexParams=dict(algorithm=FLANN_INDEX_KDTREE, trees=5), searchParams={})
+	# matcher = cv2.FlannBasedMatcher(indexParams=dict(algorithm=FLANN_INDEX_LSH, table_number=6, key_size=12, multi_probe_level=1), searchParams={})
+	
+	detector2 = cv2.ORB()
 
 	while True:
 		
@@ -155,16 +209,21 @@ if __name__ == '__main__':
 		
 		# list of pairs of best and second best match
 		top_matches = matcher.knnMatch(query_descriptors, train_descriptors, k=2)
+		# logger.debug('Found {0} matches'.format(len(top_matches)))
+
 		# filter matches
-		matches = [a for a, b in top_matches if a.distance < 0.75*b.distance]
+		matches = [a for a, b in filter(lambda m: len(m) == 2, top_matches) if a.distance < 0.75*b.distance]
+
+		# logger.debug('Retained {0} matches'.format(len(matches)))
 
 		# TODO: Get rid of magic number here
-		if len(matches) > 3:
+		if len(matches) > 10:
 			src_pts = np.float32(map(lambda m: train_keypoints[m.trainIdx].pt, matches))
 			dst_pts = np.float32(map(lambda m: query_keypoints[m.queryIdx].pt, matches))
 
-			H, mask = cv2.findHomography(src_pts, dst_pts, method=cv2.RANSAC)
-			
+			H, mask = cv2.findHomography(src_pts, dst_pts, method=cv2.RANSAC, ransacReprojThreshold=1)
+			# logger.debug(mask.ravel())
+
 			train_img_corners = np.float32(corners(train_img)).reshape(-1, 1, 2)
 
 			transformed_train_img_corners = cv2.perspectiveTransform(train_img_corners, H)
@@ -172,9 +231,10 @@ if __name__ == '__main__':
 			cv2.polylines(query_img, [np.int32(transformed_train_img_corners)], \
 				isClosed=True, color=NEON_GREEN, thickness=2, lineType=cv2.CV_AA)
 
-		# logger.debug('Detected {0} keypoints in frame'.format(len(query_keypoints)))
+		# logger.debug('Detected {0} keypoints in d'.format(len(query_keypoints)))
 		# cv2.imshow("Tracking", cv2.drawKeypoints(query_img, query_keypoints))
-		cv2.imshow("Tracking", query_img)
+		# cv2.imshow("Tracking", query_img)
+		drawImage(query_img)
 		if cv2.waitKey(1) >= 0: break
 
 	cap.release()

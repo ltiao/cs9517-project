@@ -98,6 +98,9 @@
 \usepackage{cleveref}
 \usepackage{microtype}
 
+\usepackage{titling}
+\setlength{\droptitle}{-5em}
+
 %----------------------------------------------------------------------------------------
 %	TITLE SECTION
 %----------------------------------------------------------------------------------------
@@ -108,12 +111,18 @@
 \normalfont \normalsize 
 % \textsc{university, school or department name} \\ [25pt] % Your university, school and/or department name(s)
 \horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
-\huge \LaTeX~Boilerplate \\ [0.1cm] % The assignment title
-\large Optimized for the practicing computer scientist \\ [0.2cm]
+\Large Computer Vision Project (Part 1) \\ [0.1cm] % The assignment title
+\large COMP9517 - Semester 1, 2015 \\ [0.2cm]
 \horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
 }
 
-\author{Louis Tiao} % Your name
+\author{
+	Louis Tiao \\
+	(\texttt{3390558})
+	\and
+	Edward Lee\\
+	(\texttt{3xxxxxx})
+} % Your name
 
 \date{\normalsize\today} % Today's date or a custom date
 
@@ -125,83 +134,115 @@
 %	PROBLEM 1
 %----------------------------------------------------------------------------------------
 
-\section{Problem title}
+\the\columnwidth
 
-\lipsum[2] % Dummy text
+\section{Introduction}
 
-\begin{align} 
-\begin{split}
-(x+y)^3 	&= (x+y)^2(x+y)\\
-&=(x^2+2xy+y^2)(x+y)\\
-&=(x^3+2x^2y+xy^2) + (x^2y+2xy^2+y^3)\\
-&=x^3+3x^2y+3xy^2+y^3
-\end{split}					
-\end{align}
+In Part 1 of the project, we are tasked with implementing software to track a number 
+of (planar) objects in sequential video frames. In other words, given a number of 
+reference images containing planar objects, we are required to estimate the motion 
+models that describe how the objects are changing in the video sequence over time, 
+in terms of translation, rotation, scale and other homographic transformations. We 
+present a high-level overview of our approach in \cref{sec:approach} and discuss the 
+results in \cref{sec:results}.
 
-Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies
+\section{Approach} \label{sec:approach}
 
-\begin{theorem}
-P = NP.
-\end{theorem}
+We use the conventional feature-based methods to address this task. Namely, we find
+the correspondences between distinctive features in the video frames and the reference 
+images, such as corners, edges, blobs, etc. and thereby fit a homographic transformation 
+to the corresponding points in the video frame and reference image. This process is
+broken down into the following subtasks, and we describe our approach for each one.
 
-\begin{proof}
-Left as an exercise to the reader.
-\end{proof}
+\subsection{Detection and Description}
 
-%------------------------------------------------
+% If space allows:
+% * discuss parameters
+% * reference OpenCV functions
+% * add image matching example
+% * other combinations
+% * different detectors for reference images and video frames
+% TODO:
+% * references
+% * point to discussion
 
-\subsection{Heading on level 2 (subsection)}
+To detect distinctive features in images and compute their description vectors 
+(descriptors), we first experimented with the class of algorithms based on scale-space 
+extrema detection: \emph{Scale-Invariant Feature Transform} \citep{Lowe2004} (SIFT) and 
+\emph{Speeded-Up Robust Features} \citep{Bay2008} (SURF), the latter being an improvement 
+and optimization 
+of the former. 
 
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. 
-\begin{align}
-A = 
-\begin{bmatrix}
-A_{11} & A_{21} \\
-A_{21} & A_{22}
-\end{bmatrix}
-\end{align}
-Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
+These algorithms encompass the tasks of detecting features and computing descriptors
+in a way that is both scale and rotation invariant. In practice, we found SIFT offered
+very good performance in terms of accuracy, but was impractically slow for real-time 
+application. Although SURF offered better performance in terms of speed, it did so at
+the cost of some accuracy and was ultimately still too slow for real-time application.
 
-%------------------------------------------------
+Next, we experimented with (a combination of) other feature detectors and descriptor 
+extractors, namely: \emph{Features from Accelerated Segment Test} \citep{Rosten2006} (FAST), 
+which is solely a feature detector, \emph{Binary Robust Independent Elementary Features} 
+\citep{Calonder2010} (BRIEF), which is solely a descriptor extractor, and finally, 
+\emph{Oriented FAST and Rotated BRIEF} \citep{Rublee2011} (ORB), which (as the name suggests) 
+is an amalgamation of FAST and BRIEF with modifications to support rotation invariance.
 
-\subsubsection{Heading on level 3 (subsubsection)}
+As expected, the combination of FAST and BRIEF performed much faster than SIFT/SURF,
+and was of comparable accuracy to SIFT/SURF when there was little to no rotation, but
+of practically no accuracy in the presence of rotation. 
 
-\lipsum[3] % Dummy text
+To our dismay, we found that ORB+ORB (the combination of ORB as both a feature detector 
+and descriptor extractor), while still very fast, was not more accurate than FAST+BRIEF 
+in the presence of rotation, let alone without it.
 
-\paragraph{Heading on level 4 (paragraph)}
+In the end, we concluded that SURF+SURF was most suitable for real-time applications with
+rotation, and otherwise FAST+BRIEF for those without it. For offline applications,
+SIFT+SIFT remains the most suitable. We designed our software to allow for different  
+combinations of feature detector and descriptor extractor to be specified at runtime,
+to account for the different possible kinds of applications.
 
-\lipsum[6] % Dummy text
+\subsection{Matching}
 
-%----------------------------------------------------------------------------------------
-%	PROBLEM 2
-%----------------------------------------------------------------------------------------
+Once we detect the features (keypoint) and compute their descriptor vectors in both the 
+video frame and the reference image(s), we match them by identifying the nearest neighbor 
+of the keypoint in a video frame in the set of keypoints of the reference images. The
+distance metric, and by extension, the definition of nearest neighbor is dependent upon the 
+descriptor extractor, since the descriptor computed under SIFT/SURF is a 128-element 
+real-valued vector, while it is a binary string under ORB/BRIEF.
 
-\section{Lists}
+For descriptor extractors that use real-valued vectors, we experimented with the exhaustive 
+search matcher, implemented with \texttt{BFMatcher} in OpenCV, with the $L_2$-norm (Euclidean 
+distance) as the distance metric. We also tried an approximate nearest neighbor matcher, 
+specifically using $k$-d trees and implemented with \texttt{FlannBasedMatcher} in OpenCV 
+and its interface to FLANN (Fast Library for Approximate Nearest Neighbors). Consistent with 
+\citeauthor{Lowe2004}'s observation in \citep{Lowe2004}, this did not provide a significant 
+speed-up over exhaustive search. 
 
-%------------------------------------------------
+For descriptor extractors that use binary strings, we likewise use an exhaustive search, but
+with Hamming distance as the distance metric and later also tried an approximate nearest neighbor 
+matcher (using Locality-sensitive hashing (LSH) instead of $k$-d trees). Again, this did not 
+provide a significant speed-up over exhaustive search. 
 
-\subsection{Example of list (3*itemize)}
-\begin{itemize}
-	\item First item in a list 
-		\begin{itemize}
-		\item First item in a list 
-			\begin{itemize}
-			\item First item in a list 
-			\item Second item in a list 
-			\end{itemize}
-		\item Second item in a list 
-		\end{itemize}
-	\item Second item in a list 
-\end{itemize}
+We perform the simple outlier rejection procedure suggested by \citeauthor{Lowe2004} after 
+the above matches have been found by comparing the distance of the closest neighbor 
+to that of the second-closest neighbor and discarding the match if the closest neighbor
+not much closer than the closest incorrect match. The rationale is that correct matches need 
+to have the the closest neighbor significantly closer than the closest incorrect match to 
+achieve reliable matching.
 
-%------------------------------------------------
+\subsection{Transformation}
 
-\subsection{Example of list (enumerate)}
-\begin{enumerate}
-\item First item in a list 
-\item Second item in a list 
-\item Third item in a list
-\end{enumerate}
+Once set of correspondences have been obtained, we use the iterative Random sample consensus 
+(RANSAC) method to fit a homographic transformation to the pairs of points in the correspondences,
+which is almost guaranteed to contains outliers. This is implemented using the \texttt{findHomography} 
+function in OpenCV with \texttt{CV\_RANSAC} specified as the method. With the transformation 
+matrix $H$, we visualize the located object in the video frame by applying $H$ to the four corner 
+points of the reference image using \texttt{perspectiveTransform} and drawing a closed polygon 
+around those points on the video frame. This serves to highlight the object and its transformation 
+with respect to the reference image.
+
+\section{Results} \label{sec:results}
+
+\bibliography{bibliography}
 
 %----------------------------------------------------------------------------------------
 
