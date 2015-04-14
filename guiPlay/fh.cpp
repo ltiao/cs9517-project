@@ -50,7 +50,7 @@ int getCode(char a[]) {
     return r;
 }
 
-int detector_code, extractor_code, matcher_code, n, offset;
+int detector_code, extractor_code, matcher_code, n;
 
 void useDetector(Mat img, vector<KeyPoint> &keypoints) {
     if (detector_code == SURF_D) {
@@ -143,6 +143,9 @@ Mat drawHomography(vector<KeyPoint> keypoints_obj,
     return img_matches;
 }
 
+bool chosen = false;
+int focus = 0;
+
 Mat process_images(vector<Mat> img_objects, vector<vector<KeyPoint> > keypoints_objects,
                    vector<Mat> descriptors_objects, Mat img_scene, 
                    vector<vector<DMatch> > &good_matches) {
@@ -170,7 +173,7 @@ Mat process_images(vector<Mat> img_objects, vector<vector<KeyPoint> > keypoints_
     }
 
     int b = 0;
-    if (n > 1) {
+    if (n > 1 && !chosen) {
         double max = scores[0];
         for (int j = 1; j < n; j++) {
             if (scores[j] > max) {
@@ -178,13 +181,20 @@ Mat process_images(vector<Mat> img_objects, vector<vector<KeyPoint> > keypoints_
                 b = j;
             }
         }
+    } else if (n > 1 && chosen && focus < n) {
+        b = focus;
     }
     
     Mat img_drawn;
-    drawMatches( img_objects[b], keypoints_objects[b], img_matches, keypoints_scene,
-                 good_matches[b], img_drawn, Scalar::all(-1), Scalar::all(-1),
+    vector<DMatch> good_matches2 = good_matches[b];
+
+    for (int i = 0; i < good_matches2.size(); i++) {
+        swap(good_matches2[i].queryIdx, good_matches2[i].trainIdx);
+    }
+
+    drawMatches( img_matches, keypoints_scene, img_objects[b], keypoints_objects[b],
+                 good_matches2, img_drawn, Scalar::all(-1), Scalar::all(-1),
                  masks[b], DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-    offset = img_objects[b].cols;
 
     return img_drawn;
 }
@@ -203,7 +213,7 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata) {
         if (sx != x && sy != y) {
             if (sx > x) swap(sx, x);
             if (sy > y) swap(sy, y);
-            cropped = orig_img(Rect(sx-offset, sy, x-sx, y-sy)).clone();
+            cropped = orig_img(Rect(sx, sy, x-sx, y-sy)).clone();
             isCropped = true;
         }
     } else if (event == EVENT_MOUSEMOVE ) {
@@ -278,6 +288,7 @@ int main( int argc, char** argv ) {
     bool preprocess = false;
     string input = "";
     vector<string> images;
+    string crop_image;
 
     // default detector and extractor codes
     detector_code = SURF_D;
@@ -286,6 +297,7 @@ int main( int argc, char** argv ) {
     for (int i = 1; i < argc; i++) {
         if (ctos(argv[i]) == "-p") preprocess = true;
         if (ctos(argv[i]) == "-v") input = ctos(argv[i+1]);
+        if (ctos(argv[i]) == "-c") crop_image = ctos(argv[i+1]);
         if (ctos(argv[i]) == "-i") images.push_back(ctos(argv[i+1]));
         if (ctos(argv[i]) == "-d") 
             if (getCode(argv[i+1]) > 0)
@@ -300,11 +312,21 @@ int main( int argc, char** argv ) {
     if (extractor_code == ORB_E || extractor_code == BRIEF_E) matcher_code = BFHAM_M;
     else matcher_code = FLANN_M;
 
-    // read in the images
-    if (n == 0) {
-        printUsage();
-        return 0;
+    namedWindow("Movie", 1);
+    setMouseCallback("Movie", CallBackFunc, NULL);
+
+    if (crop_image.length() > 0) 
+        cout << "Click and drag over desired objects. Press any key to continue\n";
+
+    while(crop_image.length() > 0) {
+        Mat crop_i = imread(crop_image);
+        img = orig_img = crop_i;
+        drawImage();
+        if (waitKey(30) >= 0) break;
+        processCrops();
     }
+
+    if (n == 0 && crop_image.length() == 0) { printUsage(); return 0; }
 
     for (int i = 0; i < images.size(); i++) img_objects.push_back(imread(images[i]));
     makeSomeStuff();
@@ -319,15 +341,14 @@ int main( int argc, char** argv ) {
 
     if(!cap.isOpened()) return -1;
 
-    if (!preprocess) {
-        namedWindow("Movie", 1);
-        setMouseCallback("Movie", CallBackFunc, NULL);
-    }
 
     clock_t startTime = clock();
     Mat img_scene;
     vector<Mat> savedMats;
     int f = 0;
+
+    // implement an option to specify the ability to crop your own 
+    // object images based on the first image.
     for(;;) {
         f++;
         processCrops();
@@ -358,11 +379,15 @@ int main( int argc, char** argv ) {
         
         if (!preprocess) drawImage();
 
-        // print out some stats
-        // for (int i = 0; i < s; i++) {
-        //     printf("Frame: %4d Score: %lf\n", f, good_matches[i].size()*1.0 / keypoints_objects[i].size()*1.0 );
-        // }
-        if(waitKey(1) >= 0) break;  
+        int key = waitKey(1);
+        if (key >= '1' && key <= '3') {
+            chosen = true; 
+            focus = key - '1';
+            cout << "Focus changed to: " << (key - '1') << endl;
+        } else if (key == '0') {
+            chosen = false;
+            cout << "Focus changed to best match\n";
+        } else if (key >= 0) break;
     }
 
     if (preprocess) {
@@ -374,11 +399,6 @@ int main( int argc, char** argv ) {
             if (waitKey(30) >= 0) break;
         }
     }
-
-    // // video write out (currently not working)    
-    // VideoWriter vwriter ("out.m4v", cap.get(CV_CAP_PROP_FOURCC), cap.get(CV_CAP_PROP_FPS), savedMats[0].size(), true);
-    // for (int i = 0; i < savedMats.size(); i++) 
-    //     vwriter.write(savedMats[i]);
 
 
     double g = double(clock() - startTime)/ (double) CLOCKS_PER_SEC;
