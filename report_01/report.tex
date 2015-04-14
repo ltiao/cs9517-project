@@ -22,7 +22,7 @@
 
 \usepackage[a4paper,margin=1in,footskip=.3in]{geometry}
 
-\linespread{1.1} % Line spacing
+\linespread{1.0} % Line spacing
 
 \setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
 \setlength{\parskip}{6pt}
@@ -121,7 +121,7 @@
 	(\texttt{3390558})
 	\and
 	Edward Lee\\
-	(\texttt{3xxxxxx})
+	(\texttt{3376371})
 } % Your name
 
 \date{\normalsize\today} % Today's date or a custom date
@@ -134,7 +134,7 @@
 %	PROBLEM 1
 %----------------------------------------------------------------------------------------
 
-\the\columnwidth
+% \the\columnwidth
 
 \section{Introduction}
 
@@ -143,8 +143,7 @@ of (planar) objects in sequential video frames. In other words, given a number o
 reference images containing planar objects, we are required to estimate the motion 
 models that describe how the objects are changing in the video sequence over time, 
 in terms of translation, rotation, scale and other homographic transformations. We 
-present a high-level overview of our approach in \cref{sec:approach} and discuss the 
-results in \cref{sec:results}.
+present a high-level overview and discussion of our approach in \cref{sec:approach}. Results are displays in \cref{sec:results}.
 
 \section{Approach} \label{sec:approach}
 
@@ -200,6 +199,8 @@ SIFT+SIFT remains the most suitable. We designed our software to allow for diffe
 combinations of feature detector and descriptor extractor to be specified at runtime,
 to account for the different possible kinds of applications.
 
+Refer to \cref{sec:results} for a visualisation of results.
+
 \subsection{Matching}
 
 Once we detect the features (keypoint) and compute their descriptor vectors in both the 
@@ -241,6 +242,9 @@ around those points on the video frame. This serves to highlight the object and 
 with respect to the reference image.
 
 \section{Results} \label{sec:results}
+
+
+\includegraphics{../figures/reproducibility.pdf}
 
 \bibliography{bibliography}
 
