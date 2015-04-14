@@ -215,6 +215,9 @@ if __name__ == '__main__':
 		matches = [a for a, b in filter(lambda m: len(m) == 2, top_matches) if a.distance < 0.75*b.distance]
 
 		# logger.debug('Retained {0} matches'.format(len(matches)))
+		print cv2.getCaptureProperty(cap, cv2.CV_CAP_PROP_FOURCC)
+
+		# cv2.VideoWriter('out.mp4', cv2.CV_FOURCC('P','I','M','1'), 20, )
 
 		# TODO: Get rid of magic number here
 		if len(matches) > 10:
