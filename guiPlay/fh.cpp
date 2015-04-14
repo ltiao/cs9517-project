@@ -50,8 +50,7 @@ int getCode(char a[]) {
     return r;
 }
 
-int detector_code, extractor_code, matcher_code;
-int offset;
+int detector_code, extractor_code, matcher_code, n, offset;
 
 // cli: -d <detector-code> -e <extractor-code>
 // defaults to SURF SURF flann
@@ -171,12 +170,9 @@ Mat drawHomography(vector<KeyPoint> keypoints_obj,
 }
 
 // globals since a mouse action can update these
-vector<Mat> img_objects;
-vector<vector<KeyPoint> > keypoints_objects;
-vector<Mat> descriptors_objects;
-vector<KeyPoint> keypoints_object;
 
-Mat process_images(Mat img_scene, 
+Mat process_images(vector<Mat> img_objects, vector<vector<KeyPoint> > keypoints_objects,
+                   vector<Mat> descriptors_objects, Mat img_scene, 
                    vector<vector<DMatch> > &good_matches) {
 
     vector<KeyPoint> keypoints_scene;
@@ -186,32 +182,29 @@ Mat process_images(Mat img_scene,
     useDetector(img_scene, keypoints_scene);
     useExtractor(img_scene, keypoints_scene, descriptors_scene);
 
-    for (int i = 0; i < img_objects.size(); i++) {
+    for (int i = 0; i < n; i++) {
         useMatcher(descriptors_objects[i], descriptors_scene, matches[i]);
         good_matches[i] = goodMatches(matches[i], descriptors_objects[i].rows);
     }
 
     Mat img_matches = img_scene.clone();
-    vector<double> scores(img_objects.size());
-    vector<Mat> masks(img_objects.size());
+    vector<double> scores(n);
+    vector<Mat> masks(n);
 
-    for (int i = 0; i < img_objects.size(); i++) {
+    for (int i = 0; i < n; i++) {
         img_matches = drawHomography(keypoints_objects[i], keypoints_scene, 
                                      good_matches[i], img_matches, img_objects[i], 
                                      scores[i], masks[i]);
-        // cout << "| for: " << i << " score: " << scores[i];
     }
-    // cout << endl;
 
-    int b = *(max_element(scores.begin(), scores.end()));
+    int b = 0;
+    if (img_objects.size() > 1) b = *(max_element(scores.begin(), scores.end()));
+    
     Mat img_drawn;
-
     drawMatches( img_objects[b], keypoints_objects[b], img_matches, keypoints_scene,
                  good_matches[b], img_drawn, Scalar::all(-1), Scalar::all(-1),
                  masks[b], DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-
     offset = img_objects[b].cols;
-    // cout << "offset: " << offset << endl;;
 
     return img_drawn;
 }
@@ -221,10 +214,43 @@ void printUsage() {
          << "[-e extractor_code]" << endl;
 }
 
+Mat img, orig_img, cropped;
+bool drawing = false, isCropped = false;
+int sx, sy, ex, ey;
 
+void CallBackFunc(int event, int x, int y, int flags, void* userdata) {
+    if (event == EVENT_LBUTTONDOWN ) {
+        drawing = true;
+        sx = x; sy = y;  
+        ex = x; ey = y;
+    } else if (event == EVENT_LBUTTONUP) {
+        drawing = false;
+        if (sx != x && sy != y) {
+            if (sx > x) swap(sx, x);
+            if (sy > y) swap(sy, y);
+            cropped = orig_img(Rect(sx-offset, sy, x-sx, y-sy)).clone();
+            isCropped = true;
+            imshow("Crop", cropped);
+        }
+    } else if (event == EVENT_MOUSEMOVE ) {
+        if (drawing) { ex = x; ey = y; } 
+    }    
+}
 
+void drawImage() {
+    if (drawing) {
+        Mat img2 = img.clone();
+        rectangle(img2, Point(sx,sy), Point(ex,ey), Scalar(255,0,0), 2, 8);   
+        imshow("Movie", img2);
+    } else {
+        imshow("Movie", img);
+    }
+}
 
-
+vector<Mat> img_objects;
+vector<vector<KeyPoint> > keypoints_objects;
+vector<Mat> descriptors_objects;
+vector<KeyPoint> keypoints_object;
 
 void makeSomeStuff() {
 
@@ -243,46 +269,14 @@ void makeSomeStuff() {
     }
 }
 
-Mat img, orig_img;
-bool drawing = false;
-bool needToMakeStuff = false;
-int sx, sy, ex, ey;
+void processCrops() {
+    if (isCropped) {
+        
 
-void CallBackFunc(int event, int x, int y, int flags, void* userdata) {
-    if (event == EVENT_LBUTTONDOWN ) {
-        drawing = true;
-        sx = x; sy = y;  
-        ex = x; ey = y;
-    } else if (event == EVENT_LBUTTONUP) {
-        drawing = false;
-        if (sx != x && sy != y) {
-            if (sx > x) swap(sx, x);
-            if (sy > y) swap(sy, y);
-            Mat disp = orig_img(Rect(sx-offset, sy, x-sx, y-sy)).clone();
-            // imshow("Crop", disp);
-
-            img_objects.clear();
-            img_objects.push_back(disp);
-            // makeSomeStuff();
-            needToMakeStuff = true;
-
-            // add to makesomestuff here
-        }
-    } else if (event == EVENT_MOUSEMOVE ) {
-        if (drawing) { ex = x; ey = y; } 
-    }    
-}
-
-void drawImage() {
-    if (drawing) {
-        Mat img2 = img.clone();
-        rectangle(img2, Point(sx,sy), Point(ex,ey), Scalar(255,0,0), 2, 8);   
-        imshow("Movie", img2);
-    } else {
-        imshow("Movie", img);
+        
+        isCropped = false;
     }
 }
-
 
 
 int main( int argc, char** argv ) {
@@ -296,7 +290,6 @@ int main( int argc, char** argv ) {
     detector_code = SURF_D;
     extractor_code = SURF_E;
 
-
     for (int i = 1; i < argc; i++) {
         if (ctos(argv[i]) == "-p") preprocess = true;
         if (ctos(argv[i]) == "-v") input = ctos(argv[i+1]);
@@ -308,16 +301,18 @@ int main( int argc, char** argv ) {
             if (getCode(argv[i+1]) > 0)
                 extractor_code = getCode(argv[i+1]);
     }
+    n = images.size();
 
     // get the right matcher
     if (extractor_code == ORB_E || extractor_code == BRIEF_E) matcher_code = BFHAM_M;
     else matcher_code = FLANN_M;
 
     // read in the images
-    if (images.size() == 0) {
+    if (n == 0) {
         printUsage();
         return 0;
     }
+
     for (int i = 0; i < images.size(); i++) img_objects.push_back(imread(images[i]));
 
     VideoCapture cap;
@@ -346,6 +341,8 @@ int main( int argc, char** argv ) {
     for(;;) {
         f++;
 
+        processCrops();
+
         // if (f % 10 == 0) {
         //     double g = double(clock() - startTime)/ (double) CLOCKS_PER_SEC;
         //     cout << "frame: " << f << " | seconds: " 
@@ -360,24 +357,26 @@ int main( int argc, char** argv ) {
     
             if (img_scene.empty()) break;
             orig_img = img_scene;
-            Mat m = process_images(img_scene, good_matches);
+
+            Mat m = process_images(img_objects, keypoints_objects, descriptors_objects,
+                                   img_scene, good_matches);
             // offset is found here
             img = m;
         }
     
         drawImage();
 
-        if (needToMakeStuff == true) {
-            // makeSomeStuff();
-            needToMakeStuff = false;
-        }
+        // if (needToMakeStuff == true) {
+        //     // makeSomeStuff();
+        //     needToMakeStuff = false;
+        // }
 
         // processed.push_back(m);
 
         // print out some stats
-        for (int i = 0; i < keypoints_objects.size(); i++) {
-            printf("Frame: %4d Score: %lf\n", f, good_matches[i].size()*1.0 / keypoints_objects[i].size()*1.0 );
-        }
+        // for (int i = 0; i < s; i++) {
+        //     printf("Frame: %4d Score: %lf\n", f, good_matches[i].size()*1.0 / keypoints_objects[i].size()*1.0 );
+        // }
 
         if(waitKey(1) >= 0) break;  
     }
