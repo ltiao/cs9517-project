@@ -1,0 +1,36 @@
+Short list
+==========
+
+1. Hand-held Video Enhancement with Stabilization and Mosaicing
+2. Removing Background Objects from Videos
+3. Lane Detection and Tracking in Grassy Areas
+
+Others
+======
+
+* 3D Reconstruction
+* Augmented Reality
+* 360 x 180 panorama
+* Video inpainting
+* Jigsaw Puzzle Solver
+* Ant Motion Tracking
+
+=======================================================
+= Video Enhancement with Stabilizations and Mosaicing =
+=======================================================
+
+High level plan?
+
+1. SIFT feature tracking
+    - Reuse existing code to stabilize videos
+        > 1) around a particular given object
+        > 2) dynamically detect in a given video an object (or background) to stabilize against
+
+2. Lucas Kanade method    
+
+3. Kalman Particle filtering
+    - Use Kalman filter to detect and smooth motion.
+    - 
+
+Option B:
+    - Read the Youtube paper and do video stabilization along proposed camera paths.
