@@ -98,6 +98,8 @@
 \usepackage{cleveref}
 \usepackage{microtype}
 
+\usepackage{todonotes}
+
 % \usepackage{titling}
 % \setlength{\droptitle}{-5em}
 
@@ -134,13 +136,48 @@
 
 \section{Problem Statement}
 
+\todo{Need to nail down a subset the below problems.}
+
+\begin{itemize}
+	\item Detecting the fact or state of one or more faces appearing in a 
+		digital image
+  \item Face verification - confidence score of similarity between faces (biometric security)
+	\item Facial search engine - searching a database of images or videos against a query face.
+  \item Head pose estimation
+  \item Unsupervised learning - Clustering faces given a number of faces
+  \item Supervised learning - classification problems depending on availability of labeled images
+    \begin{itemize}
+      \item Age, Gender
+      \item Mood
+      \item Attractiveness (could build a service that leverages Tinder API, where our software
+      creates a database of attractive and unattractive faces based on right and left swipes respective
+      by computing eigenfaces, and then automates swipes once enough examples have been seen)
+    \end{itemize}
+\end{itemize}
+
 \section{Literature Survey}
 
 Cited works \citep{litvin2003,battiato2007sift,grundmann2011auto,liu2009content,Matsushita2006}
 
+Section 14.2 Szeliski
+
+http://www.face-rec.org/
+
 \section{Approach}
 
 % outline subtasks/problems here
+
+\begin{itemize}
+  \item feature-based
+  \item template-based
+  \item appearance-based
+\end{itemize}
+
+Eigenfaces (Section 14.2.1 Szeliski)
+
+% mention which datasets to use, etc.
+
+Page 719 Szeliski
 
 \section{Plan}
 
@@ -148,15 +185,15 @@ Cited works \citep{litvin2003,battiato2007sift,grundmann2011auto,liu2009content,
 
 \begin{description}
   \item[Week 9] \hfill \\
-  The first item
+  Do stuff
   \item[Week 10] \hfill \\
-  The second item
+  Do stuff
   \item[Week 11] \hfill \\
-  The second item
+  Do stuff
   \item[Week 12] \hfill \\
-  The second item
+  Do stuff
   \item[Week 13] \hfill \\
-  The third etc \ldots
+  Do more stuff \ldots
 \end{description}
 
 \bibliography{../bibliography}
