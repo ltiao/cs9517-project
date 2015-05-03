@@ -34,3 +34,9 @@ High level plan?
 
 Option B:
     - Read the Youtube paper and do video stabilization along proposed camera paths.
+
+============================
+= Facial Recognition Stuff =
+============================
+
+http://docs.opencv.org/modules/contrib/doc/facerec/facerec_tutorial.html
