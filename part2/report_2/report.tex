@@ -134,50 +134,79 @@
 
 \section{Overview}
 
+Facial recognition is a natural human phenomenon which is relatively easy for most of the population. A facial recognition system is a computer application which performs the same task; automatically identifying or verifying a person from a digital image of their face.
+
+In Part 2 of this assignment, we will use several computer vision techniques to implement a computer recognition system. Using this as a baseline and along with machine learning techniques, we aim to tackle several more problems related to facial recognition.
+
 \section{Problem Statement}
 
-\todo{Need to nail down a subset the below problems.}
+In this project, we have several parts.
 
-\begin{itemize}
-	\item Detecting the fact or state of one or more faces appearing in a 
-		digital image
-  \item Face verification - confidence score of similarity between faces (biometric security)
-	\item Facial search engine - searching a database of images or videos against a query face.
-  \item Head pose estimation
-  \item Unsupervised learning - Clustering faces given a number of faces
-  \item Supervised learning - classification problems depending on availability of labeled images
-    \begin{itemize}
-      \item Age, Gender
-      \item Mood
-      \item Attractiveness (could build a service that leverages Tinder API, where our software
-      creates a database of attractive and unattractive faces based on right and left swipes respective
-      by computing eigenfaces, and then automates swipes once enough examples have been seen)
-    \end{itemize}
-\end{itemize}
+\todo{I jumped the gun and selected a few small subtasks. Feel free to change these as needed.}
 
-\section{Literature Survey}
+\begin{enumerate}
+  \item \textbf{Facial Recognition System:} Design a system which when given a large database of images to train on, can identify a new face by matching it against the given database and outputting the best match found. Assess the effectiveness of different techniques used to solve facial recognition evaluate each technique relative to the others.
+  \item \textbf{Facial Verification/Facial Search Engine:} Using the previous recognition system as a starting points, design and implement a program which is able to assign a confidence score of similarity between a given face and faces in the known database. The Facial Search Engine would be the same scoring output, but with an input of a video. The program would be responsible for detecting if there is a face in the image, and to which face in the database that image is most similar to.
+  \item \textbf{Facial Similarity and Clustering:} The clustering of faces based on similarity framed as an unsupervised learning problem. This means that given a large database of unseen images, we will design and implement a program which is able to cluster together faces which share some degree of similarity.
+\end{enumerate}
 
-Cited works \citep{litvin2003,battiato2007sift,grundmann2011auto,liu2009content,Matsushita2006}
+% \todo{Need to nail down a subset the below problems.}
 
-Section 14.2 Szeliski
+% \begin{itemize}
+% 	\item Detecting the fact or state of one or more faces appearing in a digital image
+%   \item Face verification - confidence score of similarity between faces (biometric security)
+% 	\item Facial search engine - searching a database of images or videos against a query face.
+%   \item Head pose estimation
+%   \item Unsupervised learning - Clustering faces given a number of faces
+%   \item Supervised learning - classification problems depending on availability of labeled images
+%     \begin{itemize}
+%       \item Age, Gender
+%       \item Mood
+%       \item Attractiveness (could build a service that leverages Tinder API, where our software
+%       creates a database of attractive and unattractive faces based on right and left swipes respective
+%       by computing eigenfaces, and then automates swipes once enough examples have been seen)
+%     \end{itemize}
+% \end{itemize}
 
-http://www.face-rec.org/
+\section{Literature Survey \& Approach}
 
-\section{Approach}
+% Cited works \citep{litvin2003,battiato2007sift,grundmann2011auto,liu2009content,Matsushita2006}
 
-% outline subtasks/problems here
+% Section 14.2 Szeliski
 
-\begin{itemize}
-  \item feature-based
-  \item template-based
-  \item appearance-based
-\end{itemize}
+% http://www.face-rec.org/
 
-Eigenfaces (Section 14.2.1 Szeliski)
+\begin{enumerate}
+  \item \textbf{Facial Recognition System:} We wish to implement more than one facial recognition system in order to do comparisons and evaluations on state of the art facial recognition techniques. One common method real-time method from involves the use of Eigenfaces, a low-dimensional representation of facial images, for facial recognition \citep{turk1991eigenfaces}. A more novel method described in \citep{krivzaj2010adaptation} details the use of SIFT feature detection in facial detection. In Part 1 of our project we already used SIFT feature detection on images meaning that we can adapt previous work and compare it to more advanced techniques such as eigenfaces for facial recognition.
+
+  \item \textbf{Facial Verification/Facial Search Engine:} 
+  Once the firs
+
+  \item \textbf{Facial Similarity and Clustering:}
+\end{enumerate}
+
+% \section{Approach}
+
+% \begin{enumerate}
+%   \item \textbf{Facial Recognition System:} The approach to this part of the assignment will be to compare different implementations for facial recognition. These techniques include feature-based matching, template-based matching and Eigenfaces.
+%   \item \textbf{Facial Verification/Facial Search Engine:} 
+%   \item \textbf{Facial Similarity and Clustering:}
+% \end{enumerate}
+
+
+% % outline subtasks/problems here
+
+% \begin{itemize}
+%   \item feature-based
+%   \item template-based
+%   \item appearance-based
+% \end{itemize}
+
+% Eigenfaces (Section 14.2.1 Szeliski)
 
 % mention which datasets to use, etc.
 
-Page 719 Szeliski
+% Page 719 Szeliski
 
 \section{Plan}
 
