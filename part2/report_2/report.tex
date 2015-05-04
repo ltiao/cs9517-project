@@ -134,57 +134,87 @@
 
 \section{Overview}
 
-Facial recognition is an example of a task which is relatively easy for humans but a much more difficult tasks for computers. In this assignment, we compare several different methods for facial recognition as well as assessing their suitability in several specific facial recognition tasks.
+Facial recognition is an example of a task which is relatively easy for most humans but much more difficult for computers. In this project, we explore and implement several conventional methods for facial recognition and assess their suitability for specific facial recognition applications.
 
-\section{Problem Statement}
+\section{Project Scope}
 
-\todo{I jumped the gun and selected a few small subtasks. Feel free to change these as needed.}
+\begin{enumerate}
+  \item \textbf{Face detection / localization:} For facial recognition to be applied to general images, it is first necessary to solve the problem of finding the locations and sizes of any faces appearing in the image.
+  \item \textbf{Facial recognition:} The main goal of this project is to survey and implement some of the state-of-art facial recognition techniques for solving the problem of automatically identifying or verifying human faces from a selection of detected faces in a digital image or frame from a video sequence. We will implement and benchmark some of the most wide-used methods in the literature outlined in \cref{sec:lit_survey} and provide comparisons and analyses on their relative performance.
+\end{enumerate}
 
-\textbf{Facial Recognition System:} The first part of this project involves designing multiple systems to best match a given image with those in a large database. The facial recognition techniques used include:
+\section{Literature Survey} \label{sec:lit_survey}
+
+An overview of the most widely-used techniques for both face detection and facial recognition can be found in Sections 14.1.1 and 14.2 of the prescribed computer vision textbook \citep[p.~658,~668]{szeliski2010computer} respectively.
+
+In particular,
+
+An extensive literature survey of the wide variety of fast face detection 
+algorithms is given in \citep{yang2002detecting}. According to their taxonomy,
+the face detection techniques can be classified as
+
+\begin{itemize}
+  \item feature-based
+  \item template-based
+  \item appearance-based 
+\end{itemize}
+
+The description of these techniques can be found in the \emph{Handbook of Face Recognition} \citep{jain2005handbook}
+
+% http://www.face-rec.org/
+
+\subsection{Datasets}
+
+\begin{table}[H]
+  \centering
+  \caption{Face image datasets}
+  \label{tab:datasets}
+  \begin{tabular}{ l p{10cm} }
+    Name & Description \\ 
+    \hline
+    Yale face database & Centered face images (Frontal faces) \\
+    & \url{http://www1.cs.columbia.edu/~belhumeur/} \\
+    FERET & Centered face images (Frontal faces) \\
+    & \url{http://www.frvt.org/FERET} \\
+    FRVT & Centered face images (Faces in various poses) \\
+    & \url{http://www.frvt.org/} \\
+    CMU PIE database & Centered face images (Faces in various poses) \\
+    & \url{http://www.ri.cmu.edu/projects/project_418.html} \\
+    CMU Multi-PIE database & Centered face images (Faces in various poses) \\
+    & \url{http://multipie.org} \\
+    Faces in the Wild & Internet images (Faces in various poses) \\
+    & \url{http://vis-www.cs.umass.edu/lfw/} \\
+    CMU frontal faces & Patches (Frontal faces) \\
+    & \url{http://vasc.ri.cmu.edu/idb/html/face/frontal images} \\
+    MIT frontal faces & Patches (Frontal faces) \\
+    & \url{http://cbcl.mit.edu/software-datasets/FaceData2.html} \\
+    CMU face detection databases & Multiple faces (Faces in various poses) \\
+    & \url{http://www.ri.cmu.edu/research project detail.html?project id=419}
+  \end{tabular}
+\end{table}
+
+\section{Approach}
+
+\begin{enumerate}
+\item \textbf{Facial Detection:} The first part of this project involves designing a system to detect a face within an image. These may include, but are not limited to
   \begin{itemize}
     \item feature-based matching \citep{krivzaj2010adaptation}
     \item template-based matching
     \item appearance-based matching
-    \item eigenfaces \citep{turk1991eigenfaces}
   \end{itemize}
-We will also benchmark each system to enable us to compare performance in recognizing a series of test images. We supplement our analysis by attempting to implement the following extensions using the technique we deem most suitable.
+We will also benchmark each system by measuring them to predefined metrics in order to enable us to establish a performance ranking.
 
-\begin{enumerate}
-    \item \textbf{Facial Verification/Facial Search Engine:} The first extension is to generate a ranking system which assigns a score of similarity between a given facial image and all images in a database. The Facial Search Engine simply extends this ranking system to video inputs.
+\todo{Should I mention the metrics here or leave the details in lit review?}
+
+    \item \textbf{Facial Recognition:} 
+    Once an image of a face can be detected in an image, the step involves matching the detected face against a predefined database of images. By constructing eigenfaces from a series of known images we will be able to rank and therefore recognize which face a given input image most resembles.
+    
   % \item \textbf{Facial Verification/Facial Search Engine:} Using the previous recognition system as a starting points, design and implement a program which is able to assign a confidence score of similarity between a given face and faces in the known database. The Facial Search Engine would be the same scoring output, but with an input of a video. The program would be responsible for detecting if there is a face in the image, and to which face in the database that image is most similar to.
   
-  \todo{check details of facial similarity and clustering. Can be changed to the supervised learning classification task}
+%   \todo{check details of facial similarity and clustering. Can be changed to the supervised learning classification task}
   
   \item \textbf{Facial Similarity and Clustering:} The clustering of faces based on similarity framed as an unsupervised learning problem. This means that given a large database of unseen images, we will design and implement a program which is able to cluster together faces which share some degree of similarity.
 \end{enumerate}
-
-% \todo{Need to nail down a subset the below problems.}
-
-% \begin{itemize}
-%   \item Detecting the fact or state of one or more faces appearing in a digital image
-%   \item Face verification - confidence score of similarity between faces (biometric security)
-%   \item Facial search engine - searching a database of images or videos against a query face.
-%   \item Head pose estimation
-%   \item Unsupervised learning - Clustering faces given a number of faces
-%   \item Supervised learning - classification problems depending on availability of labeled images
-%     \begin{itemize}
-%       \item Age, Gender
-%       \item Mood
-%       \item Attractiveness (could build a service that leverages Tinder API, where our software
-%       creates a database of attractive and unattractive faces based on right and left swipes respective
-%       by computing eigenfaces, and then automates swipes once enough examples have been seen)
-%     \end{itemize}
-% \end{itemize}
-
-\section{Literature Survey \& Approach}
-
-\todo{I do think separate Literature Survey and Approach/Method sections may be necessary.}
-
-% Cited works \citep{litvin2003,battiato2007sift,grundmann2011auto,liu2009content,Matsushita2006}
-
-% Section 14.2 Szeliski
-
-% http://www.face-rec.org/
 
 \begin{enumerate}
   \item \textbf{Facial Recognition System:} We wish to implement more than one facial recognition system in order to do comparisons and evaluations on state of the art facial recognition techniques. One common method real-time method from involves the use of Eigenfaces, a low-dimensional representation of facial images, for facial recognition \citep{turk1991eigenfaces}. A more novel method described in \citep{krivzaj2010adaptation} details the use of SIFT feature detection in facial detection. In Part 1 of our project we already used SIFT feature detection on images meaning that we can adapt previous work and compare it to more advanced techniques such as eigenfaces for facial recognition. We will be using the extended yale face database B to begin our investigation, acquiring more datasets as needed. 
@@ -195,7 +225,6 @@ We will also benchmark each system to enable us to compare performance in recogn
   \item \textbf{Facial Similarity and Clustering:}
 \end{enumerate}
 
-% \section{Approach}
 
 % \begin{enumerate}
 %   \item \textbf{Facial Recognition System:} The approach to this part of the assignment will be to compare different implementations for facial recognition. These techniques include feature-based matching, template-based matching and Eigenfaces.
@@ -222,12 +251,12 @@ We will also benchmark each system to enable us to compare performance in recogn
 
 % general plan here
 
-\begin{figure}[ht!]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[every node/.style={font=\normalsize,
   minimum height=0.5cm,minimum width=0.5cm},]
 
-  \draw[step=2cm,gray,very thin,dashed] (0,0) grid (10,10);
+  \draw[step=2cm,gray,very thin,dashed] (0,0) grid (10,8);
   \node[] at (1,-0.5) {Week 9};
   \node[] at (3,-0.5) {Week 10};
   \node[] at (5,-0.5) {Week 11};
@@ -235,21 +264,16 @@ We will also benchmark each system to enable us to compare performance in recogn
   \node[] at (9,-0.5) {Week 13};
 
   % datasets
-  \node[] at (-3, 9) {Gather datasets};
-  \fill[green!40!white] (0,8.5) rectangle (2,9.5);
+  \node[] at (-3, 7) {Gather datasets};
+  \fill[green!40!white] (0,6.5) rectangle (2,7.5);
 
   % SIFT feature detection + Eigen faces  
-  \node[] at (-3, 7) {SIFT and Eigenfaces};
-  \fill[blue!40!white] (0,6.5) rectangle (2,7.5);
-  \fill[red!40!white] (2,6.5) rectangle (4,7.5);
-
-  % ranking
-  \node[] at (-3, 5) {Ranking faces};
-  \fill[blue!40!white] (2,4.5) rectangle (4,5.5);
+  \node[] at (-3, 5) {Facial Detection};
+  \fill[blue!40!white] (0,4.5) rectangle (4,5.5);
   \fill[red!40!white] (4,4.5) rectangle (6,5.5);
 
-  % clustering
-  \node[] at (-3, 3) {Clustering faces};
+  % ranking
+  \node[] at (-3, 3) {Facial Recognition};
   \fill[blue!40!white] (4,2.5) rectangle (6,3.5);
   \fill[red!40!white] (6,2.5) rectangle (8,3.5);
 
@@ -267,8 +291,7 @@ We will also benchmark each system to enable us to compare performance in recogn
 
 \end{tikzpicture}
 \end{figure}
-
-\bibliography{../bibliography}
+\bibliography{document}
 
 %----------------------------------------------------------------------------------------
 

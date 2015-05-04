@@ -21,6 +21,7 @@
 \usepackage{color}
 \usepackage{lmodern}
 \usepackage{graphicx}
+\usepackage{tikz}
 
 \mode<presentation> {
 
@@ -102,13 +103,67 @@ The University of New South Wales \\ % Your institution for the title page
 \date{\today} % Date, can be changed to a custom date
 
 \begin{document}
-
 \maketitle
 
-\begin{frame}[t]\frametitle{title}
+\begin{frame}[t]\frametitle{Overview}
     
-% \maketitle
-Cited works \cite{litvin2003,battiato2007sift,grundmann2011auto,liu2009content,Matsushita2006}
+Cited works \cite{turk1991eigenfaces,krivzaj2010adaptation}
+
+\end{frame}
+
+\begin{frame}[t]\frametitle{Problem Statement}
+    
+\end{frame}
+
+\begin{frame}[t]\frametitle{Literature Survey}
+
+
+\end{frame}
+
+\begin{frame}[t]\frametitle{Approach}
+
+\end{frame}
+
+\begin{frame}[t]\frametitle{Timeline}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[xscale=0.77,yscale=0.72]
+
+  \draw[step=2cm,gray,very thin,dashed] (0,0) grid (10,8);
+  \node[] at (1,-0.5) {Week 9};
+  \node[] at (3,-0.5) {Week 10};
+  \node[] at (5,-0.5) {Week 11};
+  \node[] at (7,-0.5) {Week 12};
+  \node[] at (9,-0.5) {Week 13};
+
+  % datasets
+  \node[] at (-3, 7) {Gather datasets};
+  \fill[green!40!white] (0,6.5) rectangle (2,7.5);
+
+  % SIFT feature detection + Eigen faces  
+  \node[] at (-3, 5) {Facial Detection};
+  \fill[blue!40!white] (0,4.5) rectangle (4,5.5);
+  \fill[red!40!white] (4,4.5) rectangle (6,5.5);
+
+  % ranking
+  \node[] at (-3, 3) {Facial Recognition};
+  \fill[blue!40!white] (4,2.5) rectangle (6,3.5);
+  \fill[red!40!white] (6,2.5) rectangle (8,3.5);
+
+  % documentation
+  \node[] at (-3, 1) {Report and Presentation};
+  \fill[green!40!white] (6,0.5) rectangle (10,1.5);
+
+  % legend
+  \fill[green!40!white] (-4, -2) rectangle (0, -1);
+  \node[] at (-2, -1.5) {Research / Writing};
+  \fill[blue!40!white] (0, -2) rectangle (4, -1);
+  \node[] at (2, -1.5) {Implementation};
+  \fill[red!40!white] (4, -2) rectangle (8, -1);
+  \node[] at (6, -1.5) {Benchmarking};
+
+\end{tikzpicture}
+\end{figure}
 
 \end{frame}
 
