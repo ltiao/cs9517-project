@@ -20,7 +20,7 @@
 
 \documentclass[11pt]{article} % A4 paper and 11pt font size
 
-\usepackage[a4paper,margin=1in,footskip=.3in]{geometry}
+\usepackage[a4paper,margin=0.8in,footskip=.3in]{geometry}
 
 \linespread{1.0} % Line spacing
 
@@ -100,8 +100,8 @@
 
 \usepackage{todonotes}
 
-% \usepackage{titling}
-% \setlength{\droptitle}{-5em}
+\usepackage{titling}
+\setlength{\droptitle}{-5em}
 
 %----------------------------------------------------------------------------------------
 % TITLE SECTION
@@ -145,107 +145,74 @@ Facial recognition is an example of a task which is relatively easy for most hum
 
 \section{Literature Survey} \label{sec:lit_survey}
 
-An overview of the most widely-used techniques for both face detection and facial recognition can be found in Sections 14.1.1 and 14.2 of the prescribed computer vision textbook \citep[p.~658,~668]{szeliski2010computer} respectively.
+An overview of the most widely-used techniques for both face detection and facial recognition can be found in Sections 14.1.1 and 14.2 of the prescribed computer vision textbook \citep[p.~658,~668]{szeliski2010computer} respectively. We present a survey for the subtasks of facial detection and recognition respectively.
 
-In particular,
+\subsection{Face Detection Methods} 
 
-An extensive literature survey of the wide variety of fast face detection 
-algorithms is given in \citep{yang2002detecting}. According to their taxonomy,
-the face detection techniques can be classified as
+An extensive literature survey of the wide variety of fast face detection methods is given in \citep{yang2002detecting}. According to their taxonomy,
+the face detection techniques can be classified as\citep{szeliski2010computer}:
 
 \begin{itemize}
-  \item feature-based
-  \item template-based
-  \item appearance-based 
+  \item \textbf{feature-based}: ``attempts to find the locations of distinctive image features such as the eyes, nose, and mouth, and then verify whether these features are in a plausible geometrical arrangement.''
+  \item \textbf{appearance-based}: ``scan over small overlapping rectangular patches of the image searching for likely face candidates, which can then be refined using a cascade of more expensive but selective detection algorithms''
+  \item \textbf{template-based}: active appearance models (AAMs), which we will not investigate in our project.
 \end{itemize}
 
-The description of these techniques can be found in the \emph{Handbook of Face Recognition} \citep{jain2005handbook}
+We will mainly focus on the appearance-based approaches, namely
 
-% http://www.face-rec.org/
+\begin{itemize}
+  \item \textbf{Boosting}: ``Of all the face detectors currently in use, the one introduced by \citep{viola2004robust} is probably the best known and most widely used. Their technique was the first to introduce the concept of boosting to the computer vision community, which involves training a series of increasingly discriminating simple classifiers and then blending their outputs''
+  \item \textbf{Support Vector Machines}: \citep{osuna1997training}
+\end{itemize}
+
+\subsection{Facial Recognition Methods}
+
+A comprehensive treatment of facial recognition methods can be found in the \emph{Handbook of Face Recognition} \citep{jain2005handbook}.
+
+``While the earlier approaches to face recognition involved finding the locations of distinctive image features, such as the eyes, nose, and mouth, and measuring the distances between these feature locations, the more recent approaches are largely dominated by those which rely on comparing gray-level images projected onto lower dimensional subspaces called eigenfaces.''
+
+\begin{itemize}
+  \item \textbf{Eigenfaces}: \citep{turk1991eigenfaces,turk1991face}
+  \item \textbf{Fisherfaces}: ``In their paper, \citep{belhumeur1997eigenfaces} show that Fisherfaces significantly outperform the original eigenfaces algorithm, especially when faces have large amounts of illumination variation.''
+  \item \textbf{Modular eigenfaces}: ``Another way to improve the performance of eigenface-based approaches is to break up the image into separate regions such as the eyes, nose, and mouth (Figure 14.18) and to match each of these modular eigenspaces independently \citep{pentland1994view}. The advantage of such a modular approach is that it can tolerate a wider range of viewpoints, because each part can move relative to the others. It also supports a larger variety of combinations, e.g., we can model one person as having a narrow nose and bushy eyebrows, without requiring the eigenfaces to span all possible combinations of nose, mouth, and eyebrows.''
+\end{itemize}
 
 \subsection{Datasets}
 
-\begin{table}[H]
-  \centering
-  \caption{Face image datasets}
-  \label{tab:datasets}
-  \begin{tabular}{ l p{10cm} }
-    Name & Description \\ 
-    \hline
-    Yale face database & Centered face images (Frontal faces) \\
-    & \url{http://www1.cs.columbia.edu/~belhumeur/} \\
-    FERET & Centered face images (Frontal faces) \\
-    & \url{http://www.frvt.org/FERET} \\
-    FRVT & Centered face images (Faces in various poses) \\
-    & \url{http://www.frvt.org/} \\
-    CMU PIE database & Centered face images (Faces in various poses) \\
-    & \url{http://www.ri.cmu.edu/projects/project_418.html} \\
-    CMU Multi-PIE database & Centered face images (Faces in various poses) \\
-    & \url{http://multipie.org} \\
-    Faces in the Wild & Internet images (Faces in various poses) \\
-    & \url{http://vis-www.cs.umass.edu/lfw/} \\
-    CMU frontal faces & Patches (Frontal faces) \\
-    & \url{http://vasc.ri.cmu.edu/idb/html/face/frontal images} \\
-    MIT frontal faces & Patches (Frontal faces) \\
-    & \url{http://cbcl.mit.edu/software-datasets/FaceData2.html} \\
-    CMU face detection databases & Multiple faces (Faces in various poses) \\
-    & \url{http://www.ri.cmu.edu/research project detail.html?project id=419}
-  \end{tabular}
-\end{table}
+The relevant datasets for facial recognition are provided by 
+\citep[p.~719]{szeliski2010computer} and reproduced in the Appendix below.
 
 \section{Approach}
 
 \begin{enumerate}
-\item \textbf{Facial Detection:} The first part of this project involves designing a system to detect a face within an image. These may include, but are not limited to
+\item \textbf{Facial Detection:} With the packages such as OpenCV we concentrate on the following appearance-based techniques for facial detection:
   \begin{itemize}
-    \item feature-based matching \citep{krivzaj2010adaptation}
-    \item template-based matching
-    \item appearance-based matching
+    \item Boosting
+    \item SVMs
   \end{itemize}
-We will also benchmark each system by measuring them to predefined metrics in order to enable us to establish a performance ranking.
 
-\todo{Should I mention the metrics here or leave the details in lit review?}
-
-    \item \textbf{Facial Recognition:} 
-    Once an image of a face can be detected in an image, the step involves matching the detected face against a predefined database of images. By constructing eigenfaces from a series of known images we will be able to rank and therefore recognize which face a given input image most resembles.
-    
-  % \item \textbf{Facial Verification/Facial Search Engine:} Using the previous recognition system as a starting points, design and implement a program which is able to assign a confidence score of similarity between a given face and faces in the known database. The Facial Search Engine would be the same scoring output, but with an input of a video. The program would be responsible for detecting if there is a face in the image, and to which face in the database that image is most similar to.
-  
-%   \todo{check details of facial similarity and clustering. Can be changed to the supervised learning classification task}
-  
-  \item \textbf{Facial Similarity and Clustering:} The clustering of faces based on similarity framed as an unsupervised learning problem. This means that given a large database of unseen images, we will design and implement a program which is able to cluster together faces which share some degree of similarity.
+    \item \textbf{Facial Recognition:} From the datasets found in \cref{tab:datasets} we will implement, with the aid of OpenCV libraries the following linear algebra approaches to facial recognition:
+    \begin{itemize}
+      \item Eigenfaces
+      \item Fisherfaces
+      \item Modular Eigenfaces
+    \end{itemize}
 \end{enumerate}
+
+\subsection{Evaluation}
 
 \begin{enumerate}
-  \item \textbf{Facial Recognition System:} We wish to implement more than one facial recognition system in order to do comparisons and evaluations on state of the art facial recognition techniques. One common method real-time method from involves the use of Eigenfaces, a low-dimensional representation of facial images, for facial recognition \citep{turk1991eigenfaces}. A more novel method described in \citep{krivzaj2010adaptation} details the use of SIFT feature detection in facial detection. In Part 1 of our project we already used SIFT feature detection on images meaning that we can adapt previous work and compare it to more advanced techniques such as eigenfaces for facial recognition. We will be using the extended yale face database B to begin our investigation, acquiring more datasets as needed. 
-
-  \item \textbf{Facial Verification/Facial Search Engine:} 
-  Upon completion of a facial recognition system, we can then adapt it to display 
-
-  \item \textbf{Facial Similarity and Clustering:}
+  \item \textbf{Facial Detection:} In order to evaluate each facial detection algorithm, we will construct a series of images which contain faces of different orientations in different locations in the frame of each image. The metric we will use to evaluate the accuracy of a particular technique will be the percentage of correctly detected images.
+    \item \textbf{Facial Recognition} Most datasets consist of multiple subjects, of which there exists multiple images. For every individual, we split up their images into a training set and an evaluation set. This is so that when we match an image from the evaluation set to images in the training set, the actual image should resemble a known subject, but the image will not have been previously seen. Then we can evaluate the accuracy of our facial recognition system by considering the percentage of correctly recognized images.
 \end{enumerate}
 
-
 % \begin{enumerate}
-%   \item \textbf{Facial Recognition System:} The approach to this part of the assignment will be to compare different implementations for facial recognition. These techniques include feature-based matching, template-based matching and Eigenfaces.
+%   \item \textbf{Facial Recognition System:} We wish to implement more than one facial recognition system in order to do comparisons and evaluations on state of the art facial recognition techniques. One common method real-time method from involves the use of Eigenfaces, a low-dimensional representation of facial images, for facial recognition \citep{turk1991eigenfaces}. A more novel method described in \citep{krivzaj2010adaptation} details the use of SIFT feature detection in facial detection. In Part 1 of our project we already used SIFT feature detection on images meaning that we can adapt previous work and compare it to more advanced techniques such as eigenfaces for facial recognition. We will be using the extended yale face database B to begin our investigation, acquiring more datasets as needed. 
+
 %   \item \textbf{Facial Verification/Facial Search Engine:} 
-%   \item \textbf{Facial Similarity and Clustering:}
+%   Upon completion of a facial recognition system, we can then adapt it to display 
 % \end{enumerate}
 
-
-% % outline subtasks/problems here
-
-% \begin{itemize}
-%   \item feature-based
-%   \item template-based
-%   \item appearance-based
-% \end{itemize}
-
-% Eigenfaces (Section 14.2.1 Szeliski)
-
-% mention which datasets to use, etc.
-
-% Page 719 Szeliski
 
 \section{Plan}
 
@@ -291,7 +258,39 @@ We will also benchmark each system by measuring them to predefined metrics in or
 
 \end{tikzpicture}
 \end{figure}
-\bibliography{document}
+\bibliography{../bibliography}
+
+\section*{Appendix}
+
+\begin{table}[H]
+  \centering
+  \caption{Facial recognition datasets}
+  \label{tab:datasets}
+  \begin{tabular}{ l p{10cm} }
+    Name & Description \\ 
+    \hline
+    Yale face database & Centered face images (Frontal faces) \\
+    & \url{http://www1.cs.columbia.edu/~belhumeur/} \\
+    FERET & Centered face images (Frontal faces) \\
+    & \url{http://www.frvt.org/FERET} \\
+    FRVT & Centered face images (Faces in various poses) \\
+    & \url{http://www.frvt.org/} \\
+    CMU PIE database & Centered face images (Faces in various poses) \\
+    & \url{http://www.ri.cmu.edu/projects/project_418.html} \\
+    CMU Multi-PIE database & Centered face images (Faces in various poses) \\
+    & \url{http://multipie.org} \\
+    Faces in the Wild & Internet images (Faces in various poses) \\
+    & \url{http://vis-www.cs.umass.edu/lfw/} \\
+    CMU frontal faces & Patches (Frontal faces) \\
+    & \url{http://vasc.ri.cmu.edu/idb/html/face/frontal images} \\
+    MIT frontal faces & Patches (Frontal faces) \\
+    & \url{http://cbcl.mit.edu/software-datasets/FaceData2.html} \\
+    CMU face detection databases & Multiple faces (Faces in various poses) \\
+    & \url{http://www.ri.cmu.edu/research project detail.html?project id=419}
+  \end{tabular}
+\end{table}
+
+
 
 %----------------------------------------------------------------------------------------
 

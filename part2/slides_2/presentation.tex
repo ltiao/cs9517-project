@@ -106,21 +106,111 @@ The University of New South Wales \\ % Your institution for the title page
 \maketitle
 
 \begin{frame}[t]\frametitle{Overview}
+\begin{itemize}
+    \item Facial recognition is easy for humans but hard for computers.
+    \item Has multiple applications from security to crime to social media.
+    \item Not always accurate.
+    \item A very large and active field of research.
+\end{itemize}
     
-Cited works \cite{turk1991eigenfaces,krivzaj2010adaptation}
+\begin{minipage}[t]{0.45\linewidth}
+    \begin{figure}
+    \includegraphics[width=0.88\linewidth]{Eigenfaces.png}
+    \end{figure}
+\end{minipage}
+\hfill%
+\begin{minipage}[t]{0.45\linewidth}
+        \begin{figure}
+    \includegraphics[width=0.8\linewidth]{holdold.png}
+    \end{figure}
+\end{minipage}
 
 \end{frame}
 
-\begin{frame}[t]\frametitle{Problem Statement}
+\begin{frame}[t]\frametitle{Project Scope}
+    
+\begin{minipage}[t]{0.55\linewidth}
+    \begin{enumerate}
+      \item \textbf{Face detection / localization:} 
+      \begin{itemize}
+          \item Detecting if there is, or isn't, a face in a particular image.
+          \item The face can appear in any location, be rotated and resized.
+      \end{itemize}
+
+      \item \textbf{Facial recognition:} 
+      \begin{itemize}
+          \item Given a face and a set of images, find the images which best match the face.
+
+      \end{itemize}
+    \end{enumerate}
+\end{minipage}
+\begin{minipage}[t]{0.35\linewidth}
+    \begin{figure}
+    \includegraphics[width=\linewidth]{detect.png}
+    \end{figure}
+\end{minipage}
+
+\,
+\textbf{Benchmarking and comparison}
+\begin{itemize}
+    \item Large body of research results in multiple implementations and relevant algorithms. 
+    \item Benchmarking and performance analysis results in a better understanding of the strengths and limitations of each technique.
+\end{itemize}
     
 \end{frame}
 
 \begin{frame}[t]\frametitle{Literature Survey}
 
+\begin{minipage}[t]{0.45\linewidth}
+    \textbf{Face Detection Methods} \cite{yang2002detecting}
+    \begin{itemize}
+        \item feature-based
+        \item template-based
+        \item appearance-based
+        \begin{itemize}
+            \item Boosting \cite{viola2004robust}
+            \item SVMs \cite{osuna1997training}
+            % \item Neural networks
+        \end{itemize}
+    \end{itemize}
+
+    \textbf{Facial Recognition Methods} \cite{jain2005handbook}
+
+    \begin{itemize}
+        \item Eigenfaces \cite{turk1991eigenfaces,turk1991face}
+        \item Fisherfaces \cite{belhumeur1997eigenfaces}
+        \item Modular eigenfaces \cite{pentland1994view}
+    \end{itemize}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.45\linewidth}
+        \begin{figure}
+            \includegraphics[width=\linewidth]{robust.png}
+        \end{figure}
+    \end{minipage}
 
 \end{frame}
 
-\begin{frame}[t]\frametitle{Approach}
+\begin{frame}[t]\frametitle{Approach \& Evaluation}
+
+    \begin{enumerate}
+        \item \textbf{Facial Detection:} 
+
+        With the packages such as OpenCV we concentrate on the following appearance-based techniques for facial detection:
+      \begin{itemize}
+        \item Boosting
+        \item SVMs
+      \end{itemize}
+
+        \item \textbf{Facial Recognition:} 
+
+        From researched datasets, with the aid of OpenCV libraries the following linear algebra approaches to facial recognition:
+        \begin{itemize}
+          \item Eigenfaces
+          \item Fisherfaces
+          \item Modular Eigenfaces
+        \end{itemize}
+    \end{enumerate}
 
 \end{frame}
 
