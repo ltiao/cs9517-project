@@ -89,7 +89,7 @@
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-\title[Computer Vision]{Computer Vision Project} % The short title appears at the bottom of every slide, the full title is only on the title page
+\title[Computer Vision]{Facial Detection and Recognition} % The short title appears at the bottom of every slide, the full title is only on the title page
 
 \author{Louis Tiao \& Edward Lee} % Your name
 \institute[UNSW] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
@@ -198,9 +198,10 @@ The University of New South Wales \\ % Your institution for the title page
 
         With the packages such as OpenCV we concentrate on the following appearance-based techniques for facial detection:
       \begin{itemize}
-        \item Boosting
+        \item Boosting Viola-Jones framework (Haar features selection, integral image, Adaboost, cascaded classifiers.)
         \item SVMs
       \end{itemize}
+      Evaluate by percentage of correctly detected faces.
 
         \item \textbf{Facial Recognition:} 
 
@@ -210,6 +211,7 @@ The University of New South Wales \\ % Your institution for the title page
           \item Fisherfaces
           \item Modular Eigenfaces
         \end{itemize}
+        Split data sets into training and evaluation sets. Attempt to recognize a face from the evaluation set by comparing to training set.
     \end{enumerate}
 
 \end{frame}

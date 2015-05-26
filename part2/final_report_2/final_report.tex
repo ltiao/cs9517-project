@@ -1,0 +1,204 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Frits Wenneker (http://www.howtotex.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+% PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[11pt]{article} % A4 paper and 11pt font size
+
+\usepackage[a4paper,margin=0.8in,footskip=.3in]{geometry}
+
+\linespread{1.0} % Line spacing
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+\setlength{\parskip}{6pt}
+
+\usepackage{sectsty} % Allows customizing section commands
+\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+
+\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+\usepackage{listings}
+
+\usepackage{tikz}
+
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+\usepackage{siunitx}
+
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{graphicx}
+
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{array}
+
+\usepackage{url}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+\usepackage{cleveref}
+\usepackage{microtype}
+
+\usepackage{todonotes}
+
+\usepackage{titling}
+\setlength{\droptitle}{-5em}
+
+%----------------------------------------------------------------------------------------
+% TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{ 
+\normalfont \normalsize 
+% \textsc{university, school or department name} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\Large Computer Vision Project (Part 2) \\ [0.1cm] % The assignment title
+\large COMP9517 - Semester 1, 2015 \\ [0.2cm]
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{
+  Louis Tiao \\
+  (\texttt{3390558})
+  \and
+  Edward Lee\\
+  (\texttt{3376371})
+} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+\maketitle % Print the title
+
+\section{Quick Plan}
+
+\textbf{Unconstrained Problem}: Given an image of a face, train to detect if there is a face, and give an answer as the position of the face in the scene.
+
+\textbf{Constrained Problem}: Given an image of a face, train to detect if there is a face and give an answer as yes or no.
+
+\subsection{Methods}
+\begin{itemize}
+  \item Eigenfaces - will only use with the constrained problem.
+  \item SVMs - both problems
+  \item Viola Jones - both problems
+\end{itemize}
+
+\subsection{Datasets}
+\begin{enumerate}
+  \item FDDB: http://vis-www.cs.umass.edu/fddb/fddb.pdf 
+
+    - annotated ellipses with the Faces in the Wild dataset
+  \item Yale database (has different imaging conditions)
+  \item 
+\end{enumerate}
+
+\subsection{Factors:}
+\begin{itemize}
+  \item Location (in scene) - a face is positioned at different locations in an image
+  \begin{itemize}
+    \item \textbf{Dataset:} FDDB
+    \item \textbf{Problems:} Both 
+  \end{itemize}
+  \item Pose - the face is tilted to some angle
+  \begin{itemize}
+    \item \textbf{Dataset:} FDDB
+    \item \textbf{Problems:} Both 
+  \end{itemize}
+    \item Orientation
+  \begin{itemize}
+    \item \textbf{Dataset:} ??
+    \item \textbf{Problems:} ??
+  \end{itemize}
+  \item Occlusion
+  \begin{itemize}
+    \item \textbf{Dataset:} Yale + Manual Occlusion via cropping face
+    \item \textbf{Problems:} Constrained 
+  \end{itemize}
+  \item Imaging Condition
+  \begin{itemize}
+    \item \textbf{Dataset:} Yale
+    \item \textbf{Problems:} Constrained
+  \end{itemize}
+  \item Structural Components
+
+  \begin{itemize}
+    \item \textbf{Dataset:} ??
+    \item \textbf{Problems:} Constrained
+  \end{itemize}
+\end{itemize}
+
+\subsection{Evaluation}
+
+\begin{itemize}
+  \item Unconstrained - FDDB metric - ratio of intersection of areas to union of areas of the ellipse and the detected face.
+  \item Constrained - Percentage accuracy. Can include another dimension by considering the size of the training set, or parameters of the particular factor
+\end{itemize}
+
+
+
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
