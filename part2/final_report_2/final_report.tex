@@ -143,6 +143,11 @@
   \item Eigenfaces - will only use with the constrained problem.
   \item SVMs - both problems
   \item Viola Jones - both problems
+  \begin{itemize}
+    \item original
+    \item cascading
+  \end{itemize}
+  \item Neural networks
 \end{itemize}
 
 \subsection{Datasets}
@@ -150,8 +155,19 @@
   \item FDDB: http://vis-www.cs.umass.edu/fddb/fddb.pdf 
 
     - annotated ellipses with the Faces in the Wild dataset
+    \textbf{Representative}
+
   \item Yale database (has different imaging conditions)
-  \item 
+  \item Facial Expression Databse: http://www.kasrl.org/jaffe.html
+  \item CMU: http://vasc.ri.cmu.edu/idb/html/face/
+
+  Includes:
+  \begin{itemize}
+    \item Pose, Illumination, Expression (PIE) databse
+    \item frontal images
+    \item profile images
+    \item facial expressions
+  \end{itemize}
 \end{enumerate}
 
 \subsection{Factors:}
@@ -196,8 +212,53 @@
   \item Constrained - Percentage accuracy. Can include another dimension by considering the size of the training set, or parameters of the particular factor
 \end{itemize}
 
+\clearpage
+\section{More Complete Plan}
+
+\subsection{Training and Testing}
+Training is done on the whole set of possible training examples for each algorithm, categorized into their particular factor below. Approximates 500 training examples of differing ratios to each factor exists.
+
+Constrained testing involves testing the trained classifier's ability to detect whether or not a face exists in a given facial image with relatively uniform non-face backgrounds.. All testing images will be pictures of faces, tested with different factors. We are interested in the sensitivity or recall (TP / TP + FN) of each classifier.
+
+The unconstrained testing evaluates each classifier in a real world setting with the Faces in the Wild Database and the FDDB annotations. Each classifier is given a score.
+
+\textbf{Non-faces:} required for training all but eigenfaces.
+
+\begin{figure}[ht!]
+  \centering
+  \caption{Datasets for each stage}
+  \begin{tabular}{r|l l l l l}
+    \textbf{Training} & Neural Net & Eigen-Faces & PCA & SVM & Viola-Jones \\
+    \hline 
+    Frontal default & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET & FDDB \\
+    Pose & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET & FDDB \\
+    Lighting & Yale & Yale & Yale & Yale & FDDB \\
+    Facial Obstruction & FERET & FERET & FERET & FERET & FDDB \\
+    Expression & FERET & FERET & FERET & FERET & FERET \\
+    \hline \hline
+    \textbf{Constrained Testing} & & & & \\
+    \hline
+    Frontal default & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET \\
+    Occlusion & FERET + code & FERET + code & FERET + code & FERET + code & FERET + code \\
+    Pose & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET \\
+    Lighting & Yale & Yale & Yale & Yale & Yale \\
+    Facial Obstruction & FERET & FERET & FERET & FERET & FERET \\
+    Expression & FERET/JAFFE & FERET/JAFFE & FERET/JAFFE & FERET/JAFFE & FERET/JAFFE \\
+    \hline \hline
+    \textbf{Unconstrained Testing} & & & & \\
+    \hline
+    All factors & FDDB & FDDB & FDDB & FDDB & FDDB \\
+    
+    
+  \end{tabular}
+\end{figure}
+
+\subsection{Evaluation - Constrained}
+This is the first of two ways that an algorithm is evaluated. 
 
 
+\subsection{Evaluation - Unconstrained}
+Each of the trained algorithms in the previous instances will be evaluated among the Faces in the Wild database. All images will contain a face but the face is located in the scene in some manner.
 
 %----------------------------------------------------------------------------------------
 
