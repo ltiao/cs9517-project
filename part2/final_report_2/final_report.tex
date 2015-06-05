@@ -18,7 +18,7 @@
 % PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[11pt]{article} % A4 paper and 11pt font size
+\documentclass[11pt, twocolumn]{article} % A4 paper and 11pt font size
 
 \usepackage[a4paper,margin=0.8in,footskip=.3in]{geometry}
 
@@ -113,8 +113,9 @@
 \normalfont \normalsize 
 % \textsc{university, school or department name} \\ [25pt] % Your university, school and/or department name(s)
 \horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
-\Large Computer Vision Project (Part 2) \\ [0.1cm] % The assignment title
-\large COMP9517 - Semester 1, 2015 \\ [0.2cm]
+\Huge Facial Detection and Localization: A Survey \\[0.5cm]
+% \Large Computer Vision Project \\ [0.5cm] % The assignment title
+\large COMP9517 - Semester 1, 2015 \\ [0.5cm]
 \horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
 }
 
@@ -131,6 +132,46 @@
 \begin{document}
 
 \maketitle % Print the title
+
+
+\section{Project Goals}
+
+Facial detection and localization is an ubiquitous part of modern day computer vision with wide ranging applications from identification to entertainment. While a relatively easy task for humans and the human eye, facial detection and localization have been of particular interest towards computer vision researchers for many years.  As such, this project aims to outline and analyze a variety of different techniques for facial detection and localization in an experimental way. Doing so will allow a direct comparison between these algorithms can be made. Furthermore, analysis and experimentation will highlight real life conditions and challenging scenarios for facial detection algorithms and study the robustness with respect to these changing conditions and scenarios.
+
+\section{Literature Survey}
+Owing to the maturity of the field of facial detection, there is a large body of work and research which exists. We will be focusing on the following 4 techniques towards facial detection: Eigenfaces, Neural Networks, Support Vector Machines and Viola-Jones.
+
+\subsection{Eigenfaces}
+The eigenface technique originated from search for a low dimensional representation of a series of faces.
+\textcolor{red}{incomplete}
+
+\subsection{Neural Networks}
+\textcolor{red}{incomplete}
+
+\subsection{Support Vector Machines}
+\textcolor{red}{incomplete}
+
+\subsection{Viola Jones}
+\textcolor{red}{incomplete}
+
+\section{Project Decomposition} % subgoals
+
+
+
+
+\section{Project Scope and specification} % what the examines and tests
+
+\section{Algorithms and Design} 
+%algorithms used, outline parsing databases - include justification
+
+\section{Results}
+
+
+
+\section{Conclusion}
+
+\section{Group Subdivision}
+
 
 \section{Quick Plan}
 
@@ -224,34 +265,34 @@ The unconstrained testing evaluates each classifier in a real world setting with
 
 \textbf{Non-faces:} required for training all but eigenfaces.
 
-\begin{figure}[ht!]
-  \centering
-  \caption{Datasets for each stage}
-  \begin{tabular}{r|l l l l l}
-    \textbf{Training} & Neural Net & Eigen-Faces & PCA & SVM & Viola-Jones \\
-    \hline 
-    Frontal default & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET & FDDB \\
-    Pose & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET & FDDB \\
-    Lighting & Yale & Yale & Yale & Yale & FDDB \\
-    Facial Obstruction & FERET & FERET & FERET & FERET & FDDB \\
-    Expression & FERET & FERET & FERET & FERET & FERET \\
-    \hline \hline
-    \textbf{Constrained Testing} & & & & \\
-    \hline
-    Frontal default & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET \\
-    Occlusion & FERET + code & FERET + code & FERET + code & FERET + code & FERET + code \\
-    Pose & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET \\
-    Lighting & Yale & Yale & Yale & Yale & Yale \\
-    Facial Obstruction & FERET & FERET & FERET & FERET & FERET \\
-    Expression & FERET/JAFFE & FERET/JAFFE & FERET/JAFFE & FERET/JAFFE & FERET/JAFFE \\
-    \hline \hline
-    \textbf{Unconstrained Testing} & & & & \\
-    \hline
-    All factors & FDDB & FDDB & FDDB & FDDB & FDDB \\
+  \begin{figure}[ht!]
+    \centering
+    \caption{Datasets for each stage}
     
+    \begin{tabular}{r|l l l l}
+      \textbf{Training} & Neural Net & Eigen-Faces & SVM & Viola-Jones \\
+      \hline 
+      Frontal default & Yale/FERET & Yale/FERET & Yale/FERET & FDDB \\
+      Lighting & Yale & Yale & Yale & FDDB \\
+      Facial Obstruction & FERET & FERET & FERET & FDDB \\
+      % Expression & FERET & FERET & FERET & FDDB \\
+      \hline \hline
+      \textbf{Constrained Testing} & & & \\
+      \hline
+      Frontal default & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET \\
+      Occlusion & FERET + code & FERET + code & FERET + code & FERET + code \\
+      Pose & Yale/FERET & Yale/FERET & Yale/FERET & Yale/FERET \\
+      Lighting & Yale & Yale & Yale & Yale \\
+      Facial Obstruction & FERET & FERET & FERET & FERET \\
+      Expression & FERET/JAFFE & FERET/JAFFE & FERET/JAFFE & FERET/JAFFE \\
+      \hline \hline
+      \textbf{Unconstrained Testing} & & & \\
+      \hline
+      All factors & FDDB/CMU & FDDB/CMU & FDDB/CMU & FDDB/CMU \\
+      
+    \end{tabular}
     
-  \end{tabular}
-\end{figure}
+  \end{figure}
 
 \subsection{Evaluation - Constrained}
 This is the first of two ways that an algorithm is evaluated. 
